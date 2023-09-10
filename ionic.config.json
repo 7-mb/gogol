@@ -1,0 +1,11 @@
+{
+  "name": "gogol",
+  "integrations": {
+    "capacitor": {}
+  },
+  "type": "angular-standalone",
+  "proxies": [{
+    "path": "/api/v1/public/identify/images",
+    "proxyUrl": "https://florid.infoflora.ch"
+}]
+}

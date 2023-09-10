@@ -1,0 +1,56 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>
+      Lat: {{photoService.currentLat}}, Lon: {{photoService.currentLon}}
+    </ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true">
+  <ion-header collapse="condense">
+    <ion-toolbar>
+      <ion-title size="large">Tab 2</ion-title>
+    </ion-toolbar>
+  </ion-header>
+  <pre *ngIf="response != ''">Response: {{response}}</pre>
+
+  <p>{{url}}</p>
+
+  <ion-radio-group value="cherries" >
+    <ion-radio value="grapes" (ionSelect)="setUrl('url')">Grapes</ion-radio><br />
+    <ion-radio value="strawberries">Strawberries</ion-radio><br />
+    <ion-radio value="pineapple">Pineapple</ion-radio><br />
+    <ion-radio value="cherries">Cherries</ion-radio>
+  </ion-radio-group>
+
+  <ion-list>
+    <ion-item>
+      <ion-input label="num_taxon_id" [(ngModel)]="num_taxon_id"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-input label="req_taxon_id" [(ngModel)]="req_taxon_id"></ion-input>
+    </ion-item>
+  </ion-list>
+  <ion-grid>
+    <ion-row>
+      <ion-col size="6" *ngFor="let photo of photoService.photos; index as position">
+        <ion-img [src]="photo.webviewPath"></ion-img>
+      </ion-col>
+    </ion-row>
+  </ion-grid>
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab-button (click)="addPhotoToGallery()" [disabled]="photoService.photos.length >= 5">
+      <ion-icon name="camera"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+  <ion-fab vertical="bottom" horizontal="start" slot="fixed">
+    <ion-fab-button (click)="submit()" [disabled]="photoService.photos.length == 0">
+      <ion-icon name="send"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+  <ion-fab vertical="bottom" horizontal="center" slot="fixed">
+    <ion-fab-button (click)="clear()" [disabled]="photoService.photos.length == 0">
+      <ion-icon name="close"></ion-icon>
+    </ion-fab-button>
+  </ion-fab>
+</ion-content>
