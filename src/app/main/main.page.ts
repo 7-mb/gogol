@@ -29,8 +29,6 @@ export class MainPage {
   public num_taxon_id: number = 5;
   public req_taxon_id: number = 1046220;
   public api: API = API.Infoflora;
-  public host: string = "http://192.168.1.78";
-  public port: string = "1234";
   public urlLocal: string = "http://127.0.0.1:8000/identify/images";
   public urlInfoflora: string = "https://florid.infoflora.ch/api/v1/public/identify/images";
   public urlWsl: string = "https://florid.infoflora.ch/api/v1/public/identify/images";
@@ -96,7 +94,6 @@ export class MainPage {
       } 
       case API.Local: { 
         this.url = this.urlLocal;
-        //this.setLocalUrl();
         break; 
      } 
       default: { 
@@ -108,7 +105,6 @@ export class MainPage {
 
   setLocalUrl() {
     this.url = this.urlLocal;
-    //this.url = this.host + ":" + this.port + "/api/v1/public/identify/images";
   }
 
   getDate(): string {

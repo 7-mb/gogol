@@ -34,12 +34,6 @@
     <ion-item *ngIf="api === API.Local">
       <ion-input label="Local URL" [(ngModel)]="urlLocal" (change)="setLocalUrl()"></ion-input>
     </ion-item>
-    <ion-item *ngIf="false">
-      <ion-input label="Host name / IP" [(ngModel)]="host" (change)="setLocalUrl()"></ion-input>
-    </ion-item>
-    <ion-item *ngIf="false">
-      <ion-input label="Port" [(ngModel)]="port" (change)="setLocalUrl()"></ion-input>
-    </ion-item>
     <ion-item>
       <ion-input label="Num. Taxon ID" [(ngModel)]="num_taxon_id" type="number"></ion-input>
     </ion-item>
