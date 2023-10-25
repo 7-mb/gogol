@@ -67,7 +67,7 @@ export class MainPage {
     const body: any = {};
     if (this.attributesSelected.includes(Attribute.Images)) body.images = this.photoService.base64Photos;
     if (this.attributesSelected.includes(Attribute.LatLon)) body.lat = this.photoService.currentLat;
-    if (this.attributesSelected.includes(Attribute.LatLon)) this.photoService.currentLon;
+    if (this.attributesSelected.includes(Attribute.LatLon)) body.lon = this.photoService.currentLon;
     if (this.attributesSelected.includes(Attribute.Date)) body.date = this.date;
     if (this.attributesSelected.includes(Attribute.NumTaxonId)) body.num_taxon_ids = this.num_taxon_id;
     if (this.attributesSelected.includes(Attribute.ReqTaxonId)) body.req_taxon_ids = [this.req_taxon_id];
