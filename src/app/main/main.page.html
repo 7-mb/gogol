@@ -1,7 +1,7 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>
-      API Test
+      SpeciesID
     </ion-title>
   </ion-toolbar>
 </ion-header>
@@ -13,8 +13,8 @@
     </ion-item>
     <ion-item *ngIf="attributesSelected.includes(Attribute.LatLon) || attributesSelected.includes(Attribute.Date)">
       <ion-label color="medium" *ngIf="attributesSelected.includes(Attribute.LatLon)">
-        <small>Lat: {{photoService.currentLat}}, Lon:
-          {{photoService.currentLon}}</small>
+        <small>Lat: {{photoService.currentLat | number:'1.7-7' }}, Lon:
+          {{photoService.currentLon | number:'1.7-7' }}</small>
         </ion-label>
       <ion-label color="medium" class="ion-text-right" *ngIf="attributesSelected.includes(Attribute.Date)">
         <small>Date: {{date}}</small>
@@ -43,10 +43,10 @@
       <ion-input label="Local URL" [(ngModel)]="urlLocal" (change)="setLocalUrl()"></ion-input>
     </ion-item>
     <ion-item *ngIf="attributesSelected.includes(Attribute.NumTaxonId)">
-      <ion-input label="Num. Taxon ID" [(ngModel)]="num_taxon_id" type="number"></ion-input>
+      <ion-input label="Num. Taxon ID" [(ngModel)]="num_taxon_id" type="number" (ionChange)="numTaxonIdChange($event)"></ion-input>
     </ion-item>
     <ion-item *ngIf="attributesSelected.includes(Attribute.ReqTaxonId)">
-      <ion-input label="Req. Taxon ID" [(ngModel)]="req_taxon_id" type="number"></ion-input>
+      <ion-input label="Req. Taxon ID" [(ngModel)]="req_taxon_id" type="number" (ionChange)="reqTaxonIdChange($event)"></ion-input>
     </ion-item>
   </ion-list>
   <ion-grid *ngIf="attributesSelected.includes(Attribute.Images)">

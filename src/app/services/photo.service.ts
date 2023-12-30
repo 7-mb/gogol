@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Camera, CameraResultType, CameraSource, Photo } from '@capacitor/camera';
-//import { Filesystem, Directory } from '@capacitor/filesystem';
+import { Filesystem, Directory } from '@capacitor/filesystem';
 import { Preferences } from '@capacitor/preferences';
 import { Geolocation, Position } from '@capacitor/geolocation';
 
@@ -14,13 +14,55 @@ const ctx = outputCanvas.getContext('2d');
 export class PhotoService {
 
   public photos: UserPhoto[] = [];
-  public resizedPhotos: UserPhoto[] = [];
+  public resizedPhotos: ResizedPhoto[] = [];
   public base64Photos: string[] = [];
   public currentLat: number = 47.36667;
   public currentLon: number = 8.25;
 
   constructor() {
   }
+
+  private async savePicture(photo: Photo) {
+    // Convert photo to base64 format, required by Filesystem API to save
+    const base64Data = await this.readAsBase64(photo);
+
+    // Write the file to the data directory
+    const fileName = Date.now() + '.jpeg';
+    const savedFile = await Filesystem.writeFile({
+      path: fileName,
+      data: base64Data,
+      directory: Directory.Data
+    });
+
+    console.log("### savePicture");
+    console.log(savedFile);
+    console.log(photo.webPath);
+
+    // Use webPath to display the new image instead of base64 since it's
+    // already loaded into memory
+    return {
+      filepath: fileName,
+      webviewPath: photo.webPath
+    };
+  }
+
+  private async readAsBase64(photo: Photo) {
+    // Fetch the photo, read as a blob, then convert to base64 format
+    const response = await fetch(photo.webPath!);
+    const blob = await response.blob();
+
+    return await this.convertBlobToBase64(blob) as string;
+  }
+
+  private convertBlobToBase64 = (blob: Blob) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = () => {
+      resolve(reader.result);
+    };
+    reader.readAsDataURL(blob);
+  });
+
 
   public async addNewToGallery() {
     // Take a photo
@@ -30,13 +72,14 @@ export class PhotoService {
       quality: 100
     });
 
-    console.log(capturedPhoto);
-
-    this.photos.unshift({
-      webviewPath: capturedPhoto.webPath!
-    });
+    console.log(capturedPhoto);    
 
     const shorterSideLength = 384;
+
+    const savedImageFile = await this.savePicture(capturedPhoto);
+
+    this.photos.unshift(savedImageFile);
+
     await this.resizeImage(capturedPhoto.webPath!, shorterSideLength);
 
   }
@@ -81,7 +124,7 @@ export class PhotoService {
           if (reader.readyState === FileReader.DONE) {
             // The result property of the FileReader contains the base64-encoded data
             const base64Data = reader.result?.toString();
-            
+
             //console.log('Base64 data:', base64Data);
             console.log(typeof (base64Data));
             if (typeof base64Data === 'string') {
@@ -123,5 +166,10 @@ export class PhotoService {
 }
 
 export interface UserPhoto {
+  filepath: string;
+  webviewPath?: string;
+}
+
+export interface ResizedPhoto {
   webviewPath?: string;
 }

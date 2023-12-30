@@ -5,6 +5,10 @@ import { CommonModule } from '@angular/common';
 import { Geolocation } from '@capacitor/geolocation';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { Storage } from '@ionic/storage';
+
+const store = new Storage();
+store.create();
 
 enum API {
   Infoflora = 0,
@@ -49,11 +53,35 @@ export class MainPage {
   constructor(public photoService: PhotoService, private http: HttpClient) { }
 
   ngOnInit() {
+    this.initStorageValues();
     this.updateCoords();
     this.attributesAll = Object.values(Attribute);
     this.attributesSelected = this.attributesAll;
     this.setDate();
     console.log(this.attributesAll);
+  }
+
+  initStorageValues() {
+    store?.get('api').then(value => {
+      console.log("api value in storage: " + value);
+      value ? this.api = value : null;
+    });
+    store?.get('url').then(value => {
+      console.log("url value in storage: " + value);
+      value ? this.url = value : null;
+    });
+    store?.get('urlLocal').then(value => {
+      console.log("urlLocal value in storage: " + value);
+      value ? this.urlLocal = value : null;
+    });
+    store?.get('num_taxon_id').then(value => {
+      console.log("num_taxon_id value in storage: " + value);
+      value ? this.num_taxon_id = value : null;
+    });
+    store?.get('req_taxon_id').then(value => {
+      console.log("req_taxon_id value in storage: " + value);
+      value ? this.req_taxon_id = value : null;
+    });
   }
 
   addPhotoToGallery() {
@@ -118,10 +146,28 @@ export class MainPage {
         break;
     }
 
+    store?.set("api", this.api);
+    store?.set("url", this.url);
   }
 
   setLocalUrl() {
     this.url = this.urlLocal;
+    store?.set("url", this.urlLocal);
+    store?.set("urlLocal", this.urlLocal);
+  }
+
+  numTaxonIdChange(e: Event) {
+    console.log("numTaxonIdChange");
+    console.log(e);
+    const id = (e as CustomEvent).detail.value;
+    store?.set("num_taxon_id", id);
+  }
+
+  reqTaxonIdChange(e: Event) {
+    console.log("reqTaxonIdChange");
+    console.log(e);
+    const id = (e as CustomEvent).detail.value;
+    store?.set("req_taxon_id", id);
   }
 
   setDate() {
