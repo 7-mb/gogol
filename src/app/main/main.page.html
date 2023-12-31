@@ -49,7 +49,7 @@
       <ion-input label="Req. Taxon ID" [(ngModel)]="req_taxon_id" type="number" (ionChange)="reqTaxonIdChange($event)"></ion-input>
     </ion-item>
   </ion-list>
-  <ion-grid *ngIf="attributesSelected.includes(Attribute.Images)">
+  <ion-grid id="image-grid" *ngIf="attributesSelected.includes(Attribute.Images)">
     <ion-row>
       <ion-col size="6" *ngFor="let photo of photoService.photos; index as position">
         <ion-img [src]="photo.webviewPath"></ion-img>
@@ -57,27 +57,21 @@
     </ion-row>
   </ion-grid>
   <ion-fab vertical="bottom" horizontal="end" slot="fixed" *ngIf="attributesSelected.includes(Attribute.Images)">
-    <ion-fab-button (click)="addPhotoToGallery()" [disabled]="photoService.photos.length >= 5 || requestInProgress">
+    <ion-fab-button (click)="addPhotoToGallery()" [disabled]="photoService.photos.length >= 5">
       <ion-icon name="camera"></ion-icon>
     </ion-fab-button>
   </ion-fab>
   <ion-fab vertical="bottom" horizontal="start" slot="fixed">
-    <ion-fab-button (click)="submit()" [disabled]="photoService.photos.length == 0 || requestInProgress">
+    <ion-fab-button (click)="submit()" [disabled]="photoService.photos.length == 0">
       <ion-icon name="send"></ion-icon>
     </ion-fab-button>
   </ion-fab>
   <ion-fab vertical="bottom" horizontal="center" slot="fixed">
-    <ion-fab-button (click)="clear()" [disabled]="photoService.photos.length == 0 || requestInProgress">
+    <ion-fab-button (click)="clear()" [disabled]="photoService.photos.length == 0">
       <ion-icon name="close"></ion-icon>
     </ion-fab-button>
   </ion-fab>
 </ion-content>
-<ion-fab vertical="top" horizontal="end" slot="fixed" *ngIf="requestInProgress">
-  <ion-spinner></ion-spinner>
-</ion-fab>
-
-
-
 
 <ion-modal #modal [isOpen]="photoService.myImage !== null" [backdropDismiss]="false">
   <ng-template>

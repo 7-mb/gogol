@@ -8,6 +8,7 @@ import { HttpClient } from '@angular/common/http';
 import { Storage } from '@ionic/storage';
 import { ImageCropperModule } from 'ngx-image-cropper';
 import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
+import { LoadingController } from '@ionic/angular';
 
 const store = new Storage();
 store.create();
@@ -52,9 +53,10 @@ export class MainPage {
   public urlWsl: string = "https://florid.infoflora.ch/api/v1/public/identify/images";
   public url: string = this.urlInfoflora;
   public date: string = "";
-  public requestInProgress: boolean = false;
 
-  constructor(public photoService: PhotoService, private http: HttpClient) { }
+  constructor(public photoService: PhotoService,
+    private http: HttpClient,
+    private loadingCtrl: LoadingController) { }
 
   ngOnInit() {
     this.initStorageValues();
@@ -119,15 +121,18 @@ export class MainPage {
       'https://corsproxy.io/?' + encodeURIComponent(this.url) : this.url;
 
     let headers = { 'Content-Type': 'application/json' };
-    this.requestInProgress = true;
+    
+    const loading = await this.loadingCtrl.create();
+    await loading.present();
+
     this.http.post<any>(requestUrl, body, { headers }).subscribe({
       next: data => {
         this.response = JSON.stringify(data, undefined, 2);
-        this.requestInProgress = false;
+        this.loadingCtrl.dismiss();
       },
       error: error => {
         this.response = JSON.stringify(error, undefined, 2);
-        this.requestInProgress = false;
+        this.loadingCtrl.dismiss();
         console.error('There was an error!', error);
         alert('There was an error. Check response output.');
       }
