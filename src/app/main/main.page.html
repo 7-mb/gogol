@@ -1,7 +1,7 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>
-      API Test
+      SpeciesID
     </ion-title>
   </ion-toolbar>
 </ion-header>
@@ -13,8 +13,8 @@
     </ion-item>
     <ion-item *ngIf="attributesSelected.includes(Attribute.LatLon) || attributesSelected.includes(Attribute.Date)">
       <ion-label color="medium" *ngIf="attributesSelected.includes(Attribute.LatLon)">
-        <small>Lat: {{photoService.currentLat}}, Lon:
-          {{photoService.currentLon}}</small>
+        <small>Lat: {{photoService.currentLat | number:'1.7-7' }}, Lon:
+          {{photoService.currentLon | number:'1.7-7' }}</small>
         </ion-label>
       <ion-label color="medium" class="ion-text-right" *ngIf="attributesSelected.includes(Attribute.Date)">
         <small>Date: {{date}}</small>
@@ -43,13 +43,13 @@
       <ion-input label="Local URL" [(ngModel)]="urlLocal" (change)="setLocalUrl()"></ion-input>
     </ion-item>
     <ion-item *ngIf="attributesSelected.includes(Attribute.NumTaxonId)">
-      <ion-input label="Num. Taxon ID" [(ngModel)]="num_taxon_id" type="number"></ion-input>
+      <ion-input label="Num. Taxon ID" [(ngModel)]="num_taxon_id" type="number" (ionChange)="numTaxonIdChange($event)"></ion-input>
     </ion-item>
     <ion-item *ngIf="attributesSelected.includes(Attribute.ReqTaxonId)">
-      <ion-input label="Req. Taxon ID" [(ngModel)]="req_taxon_id" type="number"></ion-input>
+      <ion-input label="Req. Taxon ID" [(ngModel)]="req_taxon_id" type="number" (ionChange)="reqTaxonIdChange($event)"></ion-input>
     </ion-item>
   </ion-list>
-  <ion-grid *ngIf="attributesSelected.includes(Attribute.Images)">
+  <ion-grid id="image-grid" *ngIf="attributesSelected.includes(Attribute.Images)">
     <ion-row>
       <ion-col size="6" *ngFor="let photo of photoService.photos; index as position">
         <ion-img [src]="photo.webviewPath"></ion-img>
@@ -57,21 +57,51 @@
     </ion-row>
   </ion-grid>
   <ion-fab vertical="bottom" horizontal="end" slot="fixed" *ngIf="attributesSelected.includes(Attribute.Images)">
-    <ion-fab-button (click)="addPhotoToGallery()" [disabled]="photoService.photos.length >= 5 || requestInProgress">
+    <ion-fab-button (click)="addPhotoToGallery()" [disabled]="photoService.photos.length >= 5">
       <ion-icon name="camera"></ion-icon>
     </ion-fab-button>
   </ion-fab>
   <ion-fab vertical="bottom" horizontal="start" slot="fixed">
-    <ion-fab-button (click)="submit()" [disabled]="photoService.photos.length == 0 || requestInProgress">
+    <ion-fab-button (click)="submit()" [disabled]="photoService.photos.length == 0">
       <ion-icon name="send"></ion-icon>
     </ion-fab-button>
   </ion-fab>
   <ion-fab vertical="bottom" horizontal="center" slot="fixed">
-    <ion-fab-button (click)="clear()" [disabled]="photoService.photos.length == 0 || requestInProgress">
+    <ion-fab-button (click)="clear()" [disabled]="photoService.photos.length == 0">
       <ion-icon name="close"></ion-icon>
     </ion-fab-button>
   </ion-fab>
 </ion-content>
-<ion-fab vertical="top" horizontal="end" slot="fixed" *ngIf="requestInProgress">
-  <ion-spinner></ion-spinner>
-</ion-fab>
+
+<ion-modal #modal [isOpen]="photoService.myImage !== null" [backdropDismiss]="false">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title> Image Crop </ion-title>
+        <ion-buttons slot="end">
+          <ion-button (click)="photoService.imageNotCropped()">Skip</ion-button>
+          <ion-button (click)="cropImage()">
+            <ion-icon slot="icon-only" name="checkmark"></ion-icon>
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content class="ion-padding">
+      <image-cropper
+          #cropper
+          [imageBase64]="photoService.myImage"
+          [maintainAspectRatio]="true"
+          [aspectRatio]="1 / 1"
+          format="png"
+          [hideResizeSquares]="photoService.isMobile"
+          [transform]="photoService.transform"
+          [autoCrop]="false"
+          (imageCropped)="imageCropped($event)"
+          (loadImageFailed)="photoService.loadImageFailed()"
+          (imageLoaded)="photoService.imageLoaded()"
+        ></image-cropper>
+         
+        <img [src]="photoService.croppedImage" *ngIf="photoService.croppedImage" />
+    </ion-content>
+  </ng-template>
+</ion-modal>

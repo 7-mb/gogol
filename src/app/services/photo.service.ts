@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { Camera, CameraResultType, CameraSource, Photo } from '@capacitor/camera';
-//import { Filesystem, Directory } from '@capacitor/filesystem';
-import { Preferences } from '@capacitor/preferences';
-import { Geolocation, Position } from '@capacitor/geolocation';
-
+import { Filesystem, Directory } from '@capacitor/filesystem';
+import 'hammerjs';
+import { ImageCroppedEvent, ImageTransform, } from 'ngx-image-cropper';
+import { Capacitor } from '@capacitor/core';
+import { LoadingController } from '@ionic/angular';
 
 const outputCanvas = document.getElementById('outputCanvas') as HTMLCanvasElement;
 const ctx = outputCanvas.getContext('2d');
@@ -13,35 +14,130 @@ const ctx = outputCanvas.getContext('2d');
 })
 export class PhotoService {
 
+  myImage: any = null;
+  croppedImage: any = '';
+  transform: ImageTransform = {};
+  isMobile = Capacitor.getPlatform() !== 'web';
+
+  capturedImage: Photo | null = null;
+
   public photos: UserPhoto[] = [];
-  public resizedPhotos: UserPhoto[] = [];
+  public resizedPhotos: ResizedPhoto[] = [];
   public base64Photos: string[] = [];
   public currentLat: number = 47.36667;
   public currentLon: number = 8.25;
 
-  constructor() {
+  constructor(private loadingCtrl: LoadingController) {
   }
+
+  private async savePicture(webPath: string, base64: string) {
+    // Write the file to the data directory
+    const fileName = Date.now() + '.jpeg';
+    const savedFile = await Filesystem.writeFile({
+      path: fileName,
+      data: base64,
+      directory: Directory.Data
+    });
+
+    console.log("### savePicture");
+    console.log(savedFile);
+    console.log(webPath);
+
+    // Use webPath to display the new image instead of base64 since it's
+    // already loaded into memory
+    return {
+      filepath: fileName,
+      webviewPath: webPath
+    };
+  }
+
+  private async readAsBase64(photo: Photo) {
+    // Fetch the photo, read as a blob, then convert to base64 format
+    const response = await fetch(photo.webPath!);
+    const blob = await response.blob();
+
+    return await this.convertBlobToBase64(blob) as string;
+  }
+
+  private convertBlobToBase64 = (blob: Blob) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = reject;
+    reader.onload = () => {
+      resolve(reader.result);
+    };
+    reader.readAsDataURL(blob);
+  });
+
 
   public async addNewToGallery() {
     // Take a photo
     const capturedPhoto = await Camera.getPhoto({
       resultType: CameraResultType.Uri,
+      //resultType: CameraResultType.Base64,
       source: CameraSource.Camera,
-      quality: 100
+      quality: 100,
+      allowEditing: true
     });
 
+    //const loading = await this.loadingCtrl.create();
+    //await loading.present();
+
+    console.log("myImage set");
     console.log(capturedPhoto);
 
-    this.photos.unshift({
-      webviewPath: capturedPhoto.webPath!
-    });
+    this.myImage = await this.readAsBase64(capturedPhoto);
+
+    //this.myImage = `data:image/jpeg;base64,${capturedPhoto.base64String}`;
+    this.capturedImage = capturedPhoto;
+    this.croppedImage = null;
+  }
+
+  // Called when cropper is ready
+  imageLoaded() {
+    console.log("imageLoaded");
+    this.loadingCtrl.dismiss();
+  }
+
+  // Called when we finished editing (because autoCrop is set to false)
+  imageCropped(event: ImageCroppedEvent) {
+    console.log("imageCropped");
+    console.log(event);
+    console.log(event.blob);
+    this.croppedImage = event.base64;
+    this.processImage(event);
+  }
+
+  imageNotCropped() {
+    this.myImage = null;
+    console.log("imageNotCropped");
+    console.log(this.capturedImage?.webPath!);
+    console.log(this.capturedImage);
+    this.processImage(null);
+  }
+
+  public async processImage(event: ImageCroppedEvent | null) {
+    console.log("processImage");
+    const objectUrl = event !== null ? event.objectUrl : this.capturedImage?.webPath!;
+    const base64 = event !== null ? event.base64 : this.capturedImage?.base64String
 
     const shorterSideLength = 384;
-    await this.resizeImage(capturedPhoto.webPath!, shorterSideLength);
+    const savedImageFile = await this.savePicture(objectUrl || "", base64 || "");
+    this.photos.unshift(savedImageFile);
+    await this.resizeImage(objectUrl || "", shorterSideLength);
+  }
 
+  loadImageFailed() {
+    console.log('Image load failed!');
+    this.myImage = null;
+  }
+
+  cropImage() {
+    console.log("Manually trigger the crop 2");
+    this.myImage = null;
   }
 
   public async resizeImage(blobUrl: string, shorterSideLength: number) {
+    console.log("resizeImage: " + blobUrl);
     try {
       // Create a new Image object
       const img = new Image();
@@ -81,11 +177,7 @@ export class PhotoService {
           if (reader.readyState === FileReader.DONE) {
             // The result property of the FileReader contains the base64-encoded data
             const base64Data = reader.result?.toString();
-            
-            //console.log('Base64 data:', base64Data);
-            console.log(typeof (base64Data));
             if (typeof base64Data === 'string') {
-              console.log('base64Data is a string.');
               const base64DataCut = base64Data.split(',')[1];
               this.base64Photos.unshift(base64DataCut);
             } else {
@@ -123,5 +215,10 @@ export class PhotoService {
 }
 
 export interface UserPhoto {
+  filepath: string;
+  webviewPath?: string;
+}
+
+export interface ResizedPhoto {
   webviewPath?: string;
 }
