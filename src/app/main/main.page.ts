@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { PhotoService } from '../services/photo.service';
 import { CommonModule } from '@angular/common';
@@ -6,6 +6,8 @@ import { Geolocation } from '@capacitor/geolocation';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Storage } from '@ionic/storage';
+import { ImageCropperModule } from 'ngx-image-cropper';
+import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
 
 const store = new Storage();
 store.create();
@@ -29,9 +31,11 @@ enum Attribute {
   templateUrl: 'main.page.html',
   styleUrls: ['main.page.scss'],
   standalone: true,
-  imports: [IonicModule, CommonModule, FormsModule]
+  imports: [IonicModule, CommonModule, FormsModule, ImageCropperModule]
 })
 export class MainPage {
+  @ViewChild('cropper') cropper: ImageCropperComponent | undefined;
+
   API = API;
   Attribute = Attribute;
 
@@ -76,11 +80,11 @@ export class MainPage {
     });
     store?.get('num_taxon_id').then(value => {
       console.log("num_taxon_id value in storage: " + value);
-      value ? this.num_taxon_id = value : null;
+      value ? this.num_taxon_id = Number(value) : null;
     });
     store?.get('req_taxon_id').then(value => {
       console.log("req_taxon_id value in storage: " + value);
-      value ? this.req_taxon_id = value : null;
+      value ? this.req_taxon_id = Number(value) : null;
     });
   }
 
@@ -88,6 +92,16 @@ export class MainPage {
     this.photoService.addNewToGallery();
     console.log(this.photoService.photos);
     this.updateCoords();
+  }
+
+  cropImage() {
+    console.log("Manually trigger the crop 1");
+    this.cropper?.crop();
+    this.photoService.cropImage();
+  }
+
+  imageCropped(event: ImageCroppedEvent) {
+    this.photoService.imageCropped(event);
   }
 
   async submit() {
@@ -118,7 +132,6 @@ export class MainPage {
         alert('There was an error. Check response output.');
       }
     })
-
   }
 
   clear() {
