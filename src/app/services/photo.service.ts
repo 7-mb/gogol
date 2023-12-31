@@ -75,8 +75,7 @@ export class PhotoService {
       resultType: CameraResultType.Uri,
       //resultType: CameraResultType.Base64,
       source: CameraSource.Camera,
-      quality: 100,
-      allowEditing: true
+      quality: 100
     });
 
     //const loading = await this.loadingCtrl.create();
