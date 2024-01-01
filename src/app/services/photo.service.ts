@@ -36,7 +36,7 @@ export class PhotoService {
     const savedFile = await Filesystem.writeFile({
       path: fileName,
       data: base64,
-      directory: Directory.Data
+      directory: Directory.Documents
     });
 
     
