@@ -36,7 +36,7 @@ export class PhotoService {
     const savedFile = await Filesystem.writeFile({
       path: fileName,
       data: base64,
-      directory: Directory.Data
+      directory: Directory.Documents
     });
 
     console.log("### savePicture");
@@ -74,9 +74,9 @@ export class PhotoService {
     const capturedPhoto = await Camera.getPhoto({
       resultType: CameraResultType.Uri,
       //resultType: CameraResultType.Base64,
-      source: CameraSource.Camera,
+      source: CameraSource.Prompt,
       quality: 100,
-      allowEditing: true
+      saveToGallery: true
     });
 
     //const loading = await this.loadingCtrl.create();
