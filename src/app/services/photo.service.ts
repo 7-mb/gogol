@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { Camera, CameraResultType, CameraSource, Photo } from '@capacitor/camera';
-import { Filesystem, Directory } from '@capacitor/filesystem';
 import 'hammerjs';
 import { ImageCroppedEvent, ImageTransform, } from 'ngx-image-cropper';
 import { Capacitor } from '@capacitor/core';
@@ -30,7 +29,8 @@ export class PhotoService {
   constructor(private loadingCtrl: LoadingController) {
   }
 
-  private async savePicture(webPath: string, base64: string) {
+  /*private async savePicture(webPath: string, base64: string) {
+    console.log("### savePicture");
     // Write the file to the data directory
     const fileName = Date.now() + '.jpeg';
     const savedFile = await Filesystem.writeFile({
@@ -39,8 +39,8 @@ export class PhotoService {
       directory: Directory.Data
     });
 
-    console.log("### savePicture");
-    console.log(savedFile);
+    
+    //console.log(savedFile);
     console.log(webPath);
 
     // Use webPath to display the new image instead of base64 since it's
@@ -49,7 +49,7 @@ export class PhotoService {
       filepath: fileName,
       webviewPath: webPath
     };
-  }
+  }*/
 
   private async readAsBase64(photo: Photo) {
     // Fetch the photo, read as a blob, then convert to base64 format
@@ -74,8 +74,9 @@ export class PhotoService {
     const capturedPhoto = await Camera.getPhoto({
       resultType: CameraResultType.Uri,
       //resultType: CameraResultType.Base64,
-      source: CameraSource.Camera,
-      quality: 100
+      source: CameraSource.Prompt,
+      quality: 100,
+      saveToGallery: true
     });
 
     //const loading = await this.loadingCtrl.create();
@@ -120,8 +121,14 @@ export class PhotoService {
     const base64 = event !== null ? event.base64 : this.capturedImage?.base64String
 
     const shorterSideLength = 384;
-    const savedImageFile = await this.savePicture(objectUrl || "", base64 || "");
-    this.photos.unshift(savedImageFile);
+    /*const savedImageFile = await this.savePicture(objectUrl || "", base64 || "");
+    this.photos.unshift(savedImageFile);*/
+
+    this.photos.unshift({
+      filepath: "-",
+      webviewPath: objectUrl || ""
+    });
+
     await this.resizeImage(objectUrl || "", shorterSideLength);
   }
 
