@@ -1,0 +1,1 @@
+ionic cap open android
