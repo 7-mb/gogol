@@ -14,6 +14,7 @@ const ctx = outputCanvas.getContext('2d');
 export class PhotoService {
 
   myImage: any = null;
+  myImageSet: boolean = false;
   croppedImage: any = '';
   transform: ImageTransform = {};
   isMobile = Capacitor.getPlatform() !== 'web';
@@ -86,6 +87,7 @@ export class PhotoService {
     console.log(capturedPhoto);
 
     this.myImage = await this.readAsBase64(capturedPhoto);
+    this.myImageSet = true;
 
     //this.myImage = `data:image/jpeg;base64,${capturedPhoto.base64String}`;
     this.capturedImage = capturedPhoto;
@@ -95,12 +97,12 @@ export class PhotoService {
   // Called when cropper is ready
   imageLoaded() {
     console.log("imageLoaded");
-    this.loadingCtrl.dismiss();
+    //this.loadingCtrl.dismiss();
   }
 
   // Called when we finished editing (because autoCrop is set to false)
   imageCropped(event: ImageCroppedEvent) {
-    console.log("imageCropped");
+    console.log("imageCropped 2");
     console.log(event);
     console.log(event.blob);
     this.croppedImage = event.base64;
@@ -108,6 +110,7 @@ export class PhotoService {
   }
 
   imageNotCropped() {
+    this.myImageSet = false;
     this.myImage = null;
     console.log("imageNotCropped");
     console.log(this.capturedImage?.webPath!);
@@ -134,11 +137,13 @@ export class PhotoService {
 
   loadImageFailed() {
     console.log('Image load failed!');
+    this.myImageSet = false;
     this.myImage = null;
   }
 
   cropImage() {
     console.log("Manually trigger the crop 2");
+    this.myImageSet = false;
     this.myImage = null;
   }
 

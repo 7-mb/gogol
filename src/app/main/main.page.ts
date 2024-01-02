@@ -103,6 +103,8 @@ export class MainPage {
   }
 
   imageCropped(event: ImageCroppedEvent) {
+    console.log("imageCropped1");
+    console.log(JSON.stringify(event));
     this.photoService.imageCropped(event);
   }
 
