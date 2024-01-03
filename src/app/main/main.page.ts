@@ -1,4 +1,4 @@
-import { Component, ViewChild } from '@angular/core';
+import { Component } from '@angular/core';
 import { IonicModule } from '@ionic/angular';
 import { PhotoService } from '../services/photo.service';
 import { CommonModule } from '@angular/common';
@@ -7,7 +7,6 @@ import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Storage } from '@ionic/storage';
 import { ImageCropperModule } from 'ngx-image-cropper';
-import { ImageCroppedEvent, ImageCropperComponent } from 'ngx-image-cropper';
 import { LoadingController } from '@ionic/angular';
 
 const store = new Storage();
@@ -94,18 +93,6 @@ export class MainPage {
     this.updateCoords();
   }
 
-  /*cropImage() {
-    console.log("Manually trigger the crop 1");
-    this.cropper?.crop();
-    this.photoService.cropImage();
-  }*/
-
-  /*imageCropped(event: ImageCroppedEvent) {
-    console.log("imageCropped1");
-    console.log(JSON.stringify(event));
-    this.photoService.imageCropped(event);
-  }*/
-
   async submit() {
     this.setDate();
     const body: any = {};
@@ -121,7 +108,7 @@ export class MainPage {
       'https://corsproxy.io/?' + encodeURIComponent(this.url) : this.url;
 
     let headers = { 'Content-Type': 'application/json' };
-    
+
     const loading = await this.loadingCtrl.create();
     await loading.present();
 
@@ -143,6 +130,8 @@ export class MainPage {
     this.photoService.photos.length = 0;
     this.photoService.resizedPhotos.length = 0;
     this.photoService.base64Photos.length = 0;
+    this.photoService.croppingImage = null;
+    this.photoService.lastCropEvent = null;
     this.response = "";
   }
 

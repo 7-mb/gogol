@@ -12,16 +12,14 @@ const ctx = outputCanvas.getContext('2d');
   providedIn: 'root'
 })
 export class PhotoService {
-
   croppingImage: any = null;
-  showCropModal: boolean = false;
-  croppedImageEvent: ImageCroppedEvent | null = null;
+  lastCropEvent: ImageCroppedEvent | null = null;
   transform: ImageTransform = {};
   isMobile = Capacitor.getPlatform() !== 'web';
 
   capturedImage: Photo | null = null;
 
-  public photos: UserPhoto[] = [];
+  public photos: string[] = [];
   public resizedPhotos: ResizedPhoto[] = [];
   public base64Photos: string[] = [];
   public currentLat: number = 47.36667;
@@ -47,7 +45,6 @@ export class PhotoService {
     reader.readAsDataURL(blob);
   });
 
-
   public async addNewToGallery() {
     const capturedPhoto = await Camera.getPhoto({
       resultType: CameraResultType.Uri,
@@ -56,38 +53,29 @@ export class PhotoService {
       saveToGallery: true
     });
 
-    //const loading = await this.loadingCtrl.create();
-    //await loading.present();
+    const loading = await this.loadingCtrl.create();
+    await loading.present();
 
-    console.log("croppingImage set");
+    console.log("captured photo:");
     console.log(capturedPhoto);
 
     this.croppingImage = await this.readAsBase64(capturedPhoto);
-    this.showCropModal = true;
     this.capturedImage = capturedPhoto;
   }
 
   // Called when cropper is ready
   imageLoaded() {
     console.log("imageLoaded");
-    //this.loadingCtrl.dismiss();
+    this.loadingCtrl.dismiss();
   }
 
-  // Called when we finished editing (because autoCrop is set to false)
   imageCropped(event: ImageCroppedEvent) {
-    console.log("imageCropped 2");
-    console.log(event);
-    console.log(event.blob);
-    //this.croppedImage = event.base64;
-    //this.processImage(event);
-
-    //this.showCropModal = false;
-    this.croppedImageEvent = event;
+    console.log("imageCropped");
+    this.lastCropEvent = event;
   }
 
   imageNotCropped() {
-    this.croppingImage = null;
-    this.showCropModal = false;
+    this.lastCropEvent = null;
     console.log("imageNotCropped");
     console.log(this.capturedImage?.webPath!);
     console.log(this.capturedImage);
@@ -96,25 +84,18 @@ export class PhotoService {
 
   public async processImage() {
     console.log("processImage");
-    this.showCropModal = false;
-    const event = this.croppedImageEvent;
+    this.croppingImage = null;
+    const event = this.lastCropEvent;
     const objectUrl = event !== null ? event.objectUrl : this.capturedImage?.webPath!;
-    const base64 = event !== null ? event.base64 : this.capturedImage?.base64String
-
+    this.photos.unshift(objectUrl || "");
     const shorterSideLength = 384;
-
-    this.photos.unshift({
-      filepath: "-",
-      webviewPath: objectUrl || ""
-    });
-
     await this.resizeImage(objectUrl || "", shorterSideLength);
   }
 
   loadImageFailed() {
     console.log('Image load failed!');
     this.croppingImage = null;
-    this.showCropModal = false;
+    this.lastCropEvent = null;
   }
 
   public async resizeImage(blobUrl: string, shorterSideLength: number) {
@@ -193,11 +174,6 @@ export class PhotoService {
     return { width: newWidth, height: newHeight };
   }
 
-}
-
-export interface UserPhoto {
-  filepath: string;
-  webviewPath?: string;
 }
 
 export interface ResizedPhoto {

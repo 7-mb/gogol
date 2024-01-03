@@ -52,7 +52,7 @@
   <ion-grid id="image-grid" *ngIf="attributesSelected.includes(Attribute.Images)">
     <ion-row>
       <ion-col size="6" *ngFor="let photo of photoService.photos; index as position">
-        <ion-img [src]="photo.webviewPath"></ion-img>
+        <ion-img [src]="photo"></ion-img>
       </ion-col>
     </ion-row>
   </ion-grid>
@@ -73,7 +73,7 @@
   </ion-fab>
 </ion-content>
 
-<ion-modal #modal [isOpen]="photoService.showCropModal" [backdropDismiss]="false">
+<ion-modal #modal [isOpen]="photoService.croppingImage !== null" [backdropDismiss]="false">
   <ng-template>
     <ion-header>
       <ion-toolbar>
