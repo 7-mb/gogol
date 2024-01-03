@@ -73,14 +73,14 @@
   </ion-fab>
 </ion-content>
 
-<ion-modal #modal [isOpen]="photoService.myImageSet" [backdropDismiss]="false">
+<ion-modal #modal [isOpen]="photoService.showCropModal" [backdropDismiss]="false">
   <ng-template>
     <ion-header>
       <ion-toolbar>
         <ion-title> Image Crop </ion-title>
         <ion-buttons slot="end">
           <ion-button (click)="photoService.imageNotCropped()">Skip</ion-button>
-          <ion-button (click)="cropImage()">
+          <ion-button (click)="photoService.processImage()">
             <ion-icon slot="icon-only" name="checkmark"></ion-icon>
           </ion-button>
         </ion-buttons>
@@ -89,19 +89,18 @@
     <ion-content class="ion-padding">
       <image-cropper
           #cropper
-          [imageBase64]="photoService.myImage"
+          [imageBase64]="photoService.croppingImage"
           [maintainAspectRatio]="true"
           [aspectRatio]="1 / 1"
           format="png"
           [hideResizeSquares]="photoService.isMobile"
           [transform]="photoService.transform"
-          [autoCrop]="false"
-          (imageCropped)="imageCropped($event)"
+          [autoCrop]="true"
+          (imageCropped)="photoService.imageCropped($event)"
           (loadImageFailed)="photoService.loadImageFailed()"
           (imageLoaded)="photoService.imageLoaded()"
         ></image-cropper>
          
-        <img [src]="photoService.croppedImage" *ngIf="photoService.croppedImage" />
     </ion-content>
   </ng-template>
 </ion-modal>

@@ -35,8 +35,6 @@ enum Attribute {
   imports: [IonicModule, CommonModule, FormsModule, ImageCropperModule]
 })
 export class MainPage {
-  @ViewChild('cropper') cropper: ImageCropperComponent | undefined;
-
   API = API;
   Attribute = Attribute;
 
@@ -96,17 +94,17 @@ export class MainPage {
     this.updateCoords();
   }
 
-  cropImage() {
+  /*cropImage() {
     console.log("Manually trigger the crop 1");
     this.cropper?.crop();
     this.photoService.cropImage();
-  }
+  }*/
 
-  imageCropped(event: ImageCroppedEvent) {
+  /*imageCropped(event: ImageCroppedEvent) {
     console.log("imageCropped1");
     console.log(JSON.stringify(event));
     this.photoService.imageCropped(event);
-  }
+  }*/
 
   async submit() {
     this.setDate();

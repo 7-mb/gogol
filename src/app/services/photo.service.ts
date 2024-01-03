@@ -13,9 +13,9 @@ const ctx = outputCanvas.getContext('2d');
 })
 export class PhotoService {
 
-  myImage: any = null;
-  myImageSet: boolean = false;
-  croppedImage: any = '';
+  croppingImage: any = null;
+  showCropModal: boolean = false;
+  croppedImageEvent: ImageCroppedEvent | null = null;
   transform: ImageTransform = {};
   isMobile = Capacitor.getPlatform() !== 'web';
 
@@ -29,28 +29,6 @@ export class PhotoService {
 
   constructor(private loadingCtrl: LoadingController) {
   }
-
-  /*private async savePicture(webPath: string, base64: string) {
-    console.log("### savePicture");
-    // Write the file to the data directory
-    const fileName = Date.now() + '.jpeg';
-    const savedFile = await Filesystem.writeFile({
-      path: fileName,
-      data: base64,
-      directory: Directory.Documents
-    });
-
-    
-    //console.log(savedFile);
-    console.log(webPath);
-
-    // Use webPath to display the new image instead of base64 since it's
-    // already loaded into memory
-    return {
-      filepath: fileName,
-      webviewPath: webPath
-    };
-  }*/
 
   private async readAsBase64(photo: Photo) {
     // Fetch the photo, read as a blob, then convert to base64 format
@@ -71,10 +49,8 @@ export class PhotoService {
 
 
   public async addNewToGallery() {
-    // Take a photo
     const capturedPhoto = await Camera.getPhoto({
       resultType: CameraResultType.Uri,
-      //resultType: CameraResultType.Base64,
       source: CameraSource.Prompt,
       quality: 100,
       saveToGallery: true
@@ -83,15 +59,12 @@ export class PhotoService {
     //const loading = await this.loadingCtrl.create();
     //await loading.present();
 
-    console.log("myImage set");
+    console.log("croppingImage set");
     console.log(capturedPhoto);
 
-    this.myImage = await this.readAsBase64(capturedPhoto);
-    this.myImageSet = true;
-
-    //this.myImage = `data:image/jpeg;base64,${capturedPhoto.base64String}`;
+    this.croppingImage = await this.readAsBase64(capturedPhoto);
+    this.showCropModal = true;
     this.capturedImage = capturedPhoto;
-    this.croppedImage = null;
   }
 
   // Called when cropper is ready
@@ -105,27 +78,30 @@ export class PhotoService {
     console.log("imageCropped 2");
     console.log(event);
     console.log(event.blob);
-    this.croppedImage = event.base64;
-    this.processImage(event);
+    //this.croppedImage = event.base64;
+    //this.processImage(event);
+
+    //this.showCropModal = false;
+    this.croppedImageEvent = event;
   }
 
   imageNotCropped() {
-    this.myImageSet = false;
-    this.myImage = null;
+    this.croppingImage = null;
+    this.showCropModal = false;
     console.log("imageNotCropped");
     console.log(this.capturedImage?.webPath!);
     console.log(this.capturedImage);
-    this.processImage(null);
+    this.processImage();
   }
 
-  public async processImage(event: ImageCroppedEvent | null) {
+  public async processImage() {
     console.log("processImage");
+    this.showCropModal = false;
+    const event = this.croppedImageEvent;
     const objectUrl = event !== null ? event.objectUrl : this.capturedImage?.webPath!;
     const base64 = event !== null ? event.base64 : this.capturedImage?.base64String
 
     const shorterSideLength = 384;
-    /*const savedImageFile = await this.savePicture(objectUrl || "", base64 || "");
-    this.photos.unshift(savedImageFile);*/
 
     this.photos.unshift({
       filepath: "-",
@@ -137,14 +113,8 @@ export class PhotoService {
 
   loadImageFailed() {
     console.log('Image load failed!');
-    this.myImageSet = false;
-    this.myImage = null;
-  }
-
-  cropImage() {
-    console.log("Manually trigger the crop 2");
-    this.myImageSet = false;
-    this.myImage = null;
+    this.croppingImage = null;
+    this.showCropModal = false;
   }
 
   public async resizeImage(blobUrl: string, shorterSideLength: number) {
