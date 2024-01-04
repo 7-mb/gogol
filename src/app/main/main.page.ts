@@ -45,9 +45,12 @@ export class MainPage {
   public apiModalOpen: boolean = false;
   public requestParameterModalOpen: boolean = false;
 
+  loadingCtrl: LoadingController;
+
   constructor(public photoService: PhotoService,
-    private http: HttpClient,
-    private loadingCtrl: LoadingController) { }
+    private http: HttpClient) {
+    this.loadingCtrl = new LoadingController();
+  }
 
   ngOnInit() {
     this.initStorageValues();

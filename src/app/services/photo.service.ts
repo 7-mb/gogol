@@ -25,7 +25,10 @@ export class PhotoService {
   public currentLat: number = 47.36667;
   public currentLon: number = 8.25;
 
-  constructor(private loadingCtrl: LoadingController) {
+  loadingCtrl: LoadingController;
+
+  constructor() {
+    this.loadingCtrl = new LoadingController();
   }
 
   private async readAsBase64(photo: Photo) {
@@ -52,7 +55,6 @@ export class PhotoService {
       quality: 100,
       saveToGallery: true
     });
-
     const loading = await this.loadingCtrl.create();
     await loading.present();
 
