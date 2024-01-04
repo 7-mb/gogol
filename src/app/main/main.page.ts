@@ -14,7 +14,8 @@ store.create();
 
 enum Attribute {
   Images = "Images",
-  LatLon = "Latitude / Longitude",
+  Lat = "Latitude",
+  Lon = "Longitude",
   Date = "Date",
   NumTaxonId = "Num. Taxon ID",
   ReqTaxonId = "Req. Taxon ID"
@@ -33,13 +34,28 @@ export class MainPage {
   //  https -> android:networkSecurityConfig="@xml/network_security_config"
 
   public date: string = "";
+  public manualDate: string = "";
+
+  public currentLat: number = 47.36667;
+  public currentLon: number = 8.25;
+
+  public manualLat: number = 47.36667;
+  public manualLon: number = 8.25;
+
+  public isDateManual: boolean = false;
+  public isLatManual: boolean = false;
+  public isLonManual: boolean = false;
+
   public response: string = "";
   public allAttributes: string[] = [];
   public selectedAttributes: string[] = [];
   public num_taxon_id: number = 5;
   public req_taxon_id: number = 1046220;
+  public req_taxon_id_str: string = "1046220";
+  public isReqTaxonIdAlphaNumeric: boolean = false;
   public urlInfoflora: string = "https://florid.infoflora.ch/api/v1/public/identify/images";
-  public selectedApi: ApiStruct = { name: "Infoflora", url: this.urlInfoflora };
+  public urlWsl: string = "https://speciesid.wsl.ch/florid";
+  public selectedApi: ApiStruct = { name: "Plants - Info Flora", url: this.urlInfoflora };
   public customApis: ApiStruct[] = [];
   public newCustomApi: ApiStruct = { name: "", url: "" };
   public apiModalOpen: boolean = false;
@@ -80,7 +96,41 @@ export class MainPage {
     });
     store?.get('req_taxon_id').then(value => {
       console.log("req_taxon_id value in storage: ", value);
-      value ? this.req_taxon_id = Number(value) : null;
+      value && !isNaN(value) ? this.req_taxon_id = Number(value) : null;
+    });
+    store?.get('isReqTaxonIdAlphaNumeric').then(value => {
+      console.log("isReqTaxonIdAlphaNumeric value in storage: ", value);
+      value ? this.isReqTaxonIdAlphaNumeric = value : null;
+    });
+    store?.get('req_taxon_id_str').then(value => {
+      console.log("req_taxon_id_str value in storage: ", value);
+      value ? this.req_taxon_id_str = value : null;
+    });
+
+    store?.get('isDateManual').then(value => {
+      console.log("isDateManual value in storage: ", value);
+      value ? this.isDateManual = value : null;
+    });
+    store?.get('isLatManual').then(value => {
+      console.log("isLatManual value in storage: ", value);
+      value ? this.isLatManual = value : null;
+    });
+    store?.get('isLonManual').then(value => {
+      console.log("isLonManual value in storage: ", value);
+      value ? this.isLonManual = value : null;
+    });
+
+    store?.get('manualDate').then(value => {
+      console.log("manualDate value in storage: ", value);
+      value ? this.manualDate = value : null;
+    });
+    store?.get('manualLat').then(value => {
+      console.log("manualLat value in storage: ", value);
+      value ? this.manualLat = value : null;
+    });
+    store?.get('manualLon').then(value => {
+      console.log("manualLon value in storage: ", value);
+      value ? this.manualLon = value : null;
     });
   }
 
@@ -91,14 +141,16 @@ export class MainPage {
   }
 
   async submit() {
-    this.setDate();
+    if (!this.isDateManual) {
+      this.setDate();
+    }
     const body: any = {};
     if (this.selectedAttributes.includes(Attribute.Images)) body.images = this.photoService.base64Photos;
-    if (this.selectedAttributes.includes(Attribute.LatLon)) body.lat = this.photoService.currentLat;
-    if (this.selectedAttributes.includes(Attribute.LatLon)) body.lon = this.photoService.currentLon;
-    if (this.selectedAttributes.includes(Attribute.Date)) body.date = this.date;
+    if (this.selectedAttributes.includes(Attribute.Lat)) body.lat = this.isLatManual ? this.manualLat : this.currentLat;
+    if (this.selectedAttributes.includes(Attribute.Lon)) body.lon = this.isLonManual ? this.manualLon : this.currentLon;
+    if (this.selectedAttributes.includes(Attribute.Date)) body.date = this.isDateManual ? this.manualDate : this.date;
     if (this.selectedAttributes.includes(Attribute.NumTaxonId)) body.num_taxon_ids = this.num_taxon_id;
-    if (this.selectedAttributes.includes(Attribute.ReqTaxonId)) body.req_taxon_ids = [this.req_taxon_id];
+    if (this.selectedAttributes.includes(Attribute.ReqTaxonId)) body.req_taxon_ids = this.isReqTaxonIdAlphaNumeric ? [this.req_taxon_id_str] : [this.req_taxon_id];
     console.log(body);
 
     let requestUrl = 'https://corsproxy.io/?' + encodeURIComponent(this.selectedApi.url);
@@ -140,8 +192,24 @@ export class MainPage {
   reqTaxonIdChange(e: Event) {
     console.log("reqTaxonIdChange");
     console.log(e);
-    const id = (e as CustomEvent).detail.value;
-    store?.set("req_taxon_id", id);
+    const value = (e as CustomEvent).detail.value;
+    if (this.isReqTaxonIdAlphaNumeric) {
+      store?.set("req_taxon_id_str", value);
+    } else {
+      store?.set("req_taxon_id", value);
+    }
+  }
+
+  isReqTaxonIdAlphaNumericChange(e: Event) {
+    console.log("isReqTaxonIdAlphaNumericChange");
+    console.log(e);
+    const value = (e as CustomEvent).detail.value;
+    store?.set("isReqTaxonIdAlphaNumeric", value);
+    if (this.isReqTaxonIdAlphaNumeric) {
+      store?.set("req_taxon_id_str", this.req_taxon_id_str);
+    } else {
+      store?.set("req_taxon_id", this.req_taxon_id);
+    }
   }
 
   setDate() {
@@ -153,13 +221,76 @@ export class MainPage {
     const formattedDate = `${year}-${month}-${day}`;
     console.log(formattedDate);
     this.date = formattedDate;
+    if (this.manualDate == "" || this.manualDate == null) this.manualDate = formattedDate;
+  }
+
+  isDateManualChange(e: Event) {
+    console.log("isDateManualChange");
+    console.log(e);
+    const isManual = (e as CustomEvent).detail.value;
+    if (!this.isDateManual) {
+      this.manualDate = this.date;
+    }
+    store?.set("isDateManual", isManual);
+    store?.set("manualDate", this.manualDate);
+  }
+
+  isLatManualChange(e: Event) {
+    console.log("isLatManualChange");
+    console.log(e);
+    const isManual = (e as CustomEvent).detail.value;
+    if (!this.isLatManual) {
+      this.manualLat = this.currentLat;
+    }
+    store?.set("isLatManual", isManual);
+    store?.set("manualLat", this.manualLat);
+  }
+
+  isLonManualChange(e: Event) {
+    console.log("isLonManualChange");
+    console.log(e);
+    const isManual = (e as CustomEvent).detail.value;
+    if (!this.isLonManual) {
+      this.manualLon = this.currentLon;
+    }
+    store?.set("isLonManual", isManual);
+    store?.set("manualLon", this.manualLon);
+  }
+
+  onManualDateChange(e: Event) {
+    console.log("onManualDateChange");
+    console.log(e);
+    const value = (e as CustomEvent).detail.value;
+    store?.set("manualDate", value);
+  }
+
+  onManualLatChange(e: Event) {
+    console.log("onManualLatChange");
+    console.log(e);
+    const value = (e as CustomEvent).detail.value;
+    store?.set("manualLat", value);
+  }
+
+  onManualLonChange(e: Event) {
+    console.log("onManualLonChange");
+    console.log(e);
+    const value = (e as CustomEvent).detail.value;
+    store?.set("manualLon", value);
   }
 
   updateCoords() {
     Geolocation.getCurrentPosition().then((coords) => {
       console.log('Current position:', coords);
-      this.photoService.currentLat = coords.coords.latitude;
-      this.photoService.currentLon = coords.coords.longitude;
+      this.currentLat = coords.coords.latitude;
+      this.currentLon = coords.coords.longitude;
+      if (!this.isLatManual) {
+        this.manualLat = coords.coords.latitude;
+        store?.set("manualLat", this.manualLat);
+      }
+      if (!this.isLonManual) {
+        this.manualLon = coords.coords.longitude;
+        store?.set("manualLon", this.manualLon);
+      }
     })
   }
 
@@ -167,6 +298,30 @@ export class MainPage {
     console.log("selectedAttributesChange", e);
     const selectedAttributes = (e as CustomEvent).detail.value;
     this.selectedAttributes = selectedAttributes;
+    store?.set("selectedAttributes", this.selectedAttributes);
+  }
+
+  isAttributeSelected(name: string) {
+    return this.selectedAttributes.includes(name);
+  }
+
+  attributeCheckClicked(name: string) {
+    if (this.selectedAttributes.includes(name)) {
+      this.removeAttribute(name);
+    } else {
+      this.selectAttribute(name);
+    }
+  }
+
+  selectAttribute(name: string) {
+    console.log("selectAttribute: " + name);
+    this.selectedAttributes.push(name);
+    store?.set("selectedAttributes", this.selectedAttributes);
+  }
+
+  removeAttribute(name: string) {
+    console.log("removeAttribute: " + name);
+    this.selectedAttributes = this.selectedAttributes.filter(a => a !== name);
     store?.set("selectedAttributes", this.selectedAttributes);
   }
 
@@ -187,7 +342,7 @@ export class MainPage {
   removeCustomApi(api: ApiStruct) {
     console.log("removeCustomApi: ", api);
     if (this.selectedApi.name === api.name) {
-      this.resetApi();
+      this.setInfoFloraApi();
     }
     this.customApis = this.customApis.filter(a => a.name !== api.name);
     store?.set("customApis", this.customApis);
@@ -199,8 +354,13 @@ export class MainPage {
     store?.set("selectedApi", this.selectedApi);
   }
 
-  resetApi() {
-    this.selectedApi = { name: "Infoflora", url: this.urlInfoflora };
+  setInfoFloraApi() {
+    this.selectedApi = { name: "Plants - Info Flora", url: this.urlInfoflora };
+    store?.set("selectedApi", this.selectedApi);
+  }
+
+  setWslApi() {
+    this.selectedApi = { name: "Plants - WSL", url: this.urlWsl };
     store?.set("selectedApi", this.selectedApi);
   }
 

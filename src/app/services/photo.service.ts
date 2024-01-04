@@ -22,8 +22,6 @@ export class PhotoService {
   public photos: string[] = [];
   public resizedPhotos: ResizedPhoto[] = [];
   public base64Photos: string[] = [];
-  public currentLat: number = 47.36667;
-  public currentLon: number = 8.25;
 
   loadingCtrl: LoadingController;
 

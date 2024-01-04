@@ -11,15 +11,16 @@
     <ion-item *ngIf="response != ''">
       <pre>Response: {{response}}</pre>
     </ion-item>
-    <ion-item *ngIf="selectedAttributes.includes(Attribute.LatLon) || selectedAttributes.includes(Attribute.Date)">
-      <ion-label *ngIf="selectedAttributes.includes(Attribute.LatLon)">
+    <ion-item
+      *ngIf="selectedAttributes.includes(Attribute.Lat) || selectedAttributes.includes(Attribute.Lon) || selectedAttributes.includes(Attribute.Date)">
+      <ion-label *ngIf="selectedAttributes.includes(Attribute.Lat) || selectedAttributes.includes(Attribute.Lon)">
         <h3>Latitude / Longitude</h3>
-        <p><small>{{photoService.currentLat | number:'1.7-7' }} /
-            {{photoService.currentLon | number:'1.7-7' }}</small></p>
+        <p><small>{{ isLatManual ? (manualLat | number:'1.7-7') : (currentLat | number:'1.7-7') }} /
+            {{ isLonManual ? (manualLon | number:'1.7-7') : (currentLon | number:'1.7-7') }}</small></p>
       </ion-label>
       <ion-label class="ion-text-right" *ngIf="selectedAttributes.includes(Attribute.Date)">
         <h3>Date</h3>
-        <p><small>{{date}}</small></p>
+        <p><small>{{isDateManual ? manualDate : date}}</small></p>
       </ion-label>
     </ion-item>
     <ion-item>
@@ -30,19 +31,11 @@
     </ion-item>
     <ion-item (click)="configureApisClicked()">
       <ion-icon aria-hidden="true" name="chevron-forward-outline" slot="end"></ion-icon>
-      <ion-label>Configure and select APIs</ion-label>
-    </ion-item>
-    <ion-item>
-      <ion-select [(ngModel)]="selectedAttributes" label="Configure Request Payload"
-        (ionChange)="selectedAttributesChange($event)" [multiple]="true">
-        <ion-select-option *ngFor="let attribute of allAttributes; index as position"
-          [value]="attribute">{{attribute}}</ion-select-option>
-        <ion-note color="medium"></ion-note>
-      </ion-select>
+      <ion-label>Configure APIs</ion-label>
     </ion-item>
     <ion-item (click)="requestParameterModalOpen = true">
       <ion-icon aria-hidden="true" name="chevron-forward-outline" slot="end"></ion-icon>
-      <ion-label>Define Request Parameters</ion-label>
+      <ion-label>Configure Request Parameters</ion-label>
     </ion-item>
   </ion-list>
   <ion-grid id="image-grid" *ngIf="selectedAttributes.includes(Attribute.Images)">
@@ -102,7 +95,7 @@
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
-    <ion-content class="ion-padding">
+    <ion-content>
       <ion-item-divider>
         <ion-label>
           Existing
@@ -110,26 +103,31 @@
       </ion-item-divider>
       <ion-list>
         <ion-item>
-          <ion-icon (click)="resetApi()" slot="start"
-            [name]="selectedApi.name === 'Infoflora' ? 'checkmark-circle' : 'ellipse-outline'" size="large"></ion-icon>
-          <ion-label (click)="resetApi()">
-            <h3>Infoflora</h3>
+          <ion-icon (click)="setInfoFloraApi()" slot="start"
+            [name]="selectedApi.name === 'Plants - Info Flora' ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
+          <ion-label (click)="setInfoFloraApi()">
+            <h3>Plants - Info Flora</h3>
             <p><small>{{urlInfoflora}}</small></p>
+          </ion-label>
+        </ion-item>
+        <ion-item>
+          <ion-icon (click)="setWslApi()" slot="start"
+            [name]="selectedApi.name === 'Plants - WSL' ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
+          <ion-label (click)="setWslApi()">
+            <h3>Plants - WSL</h3>
+            <p><small>{{urlWsl}}</small></p>
           </ion-label>
         </ion-item>
         <ion-item *ngFor="let customApi of customApis">
           <ion-icon (click)="selectApi(customApi)" slot="start"
-            [name]="selectedApi.name === customApi.name ? 'checkmark-circle' : 'ellipse-outline'"
-            size="large"></ion-icon>
+            [name]="selectedApi.name === customApi.name ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
           <ion-label (click)="selectApi(customApi)">
             <h3>{{customApi.name}}</h3>
             <p><small>{{customApi.url}}</small></p>
           </ion-label>
-          <ion-icon slot="end" name="close-outline" size="large" (click)="removeCustomApi(customApi)"></ion-icon>
+          <ion-icon slot="end" name="close-outline" (click)="removeCustomApi(customApi)"></ion-icon>
         </ion-item>
       </ion-list>
-      <ion-item-divider>
-      </ion-item-divider>
       <ion-item-divider>
         <ion-label>
           Add New
@@ -153,20 +151,63 @@
   <ng-template>
     <ion-header>
       <ion-toolbar>
-        <ion-title>Define Request Parameters</ion-title>
+        <ion-title>Configure Request Parameters</ion-title>
         <ion-buttons slot="end">
           <ion-button (click)="requestParameterModalOpen = false">Close</ion-button>
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
-    <ion-content class="ion-padding">
+    <ion-content>
       <ion-item>
+        <ion-icon (click)="attributeCheckClicked(Attribute.Images)" slot="start"
+          [name]="isAttributeSelected(Attribute.Images) ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
+        <ion-label>Images</ion-label>
+      </ion-item>
+      <ion-item>
+        <ion-icon (click)="attributeCheckClicked(Attribute.Date)" slot="start"
+          [name]="isAttributeSelected(Attribute.Date) ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
+        <ion-input *ngIf="!isDateManual" placeholder="Date" label="Date" labelPlacement="stacked" [(ngModel)]="date"
+          type="text" [disabled]="true"></ion-input>
+        <ion-input *ngIf="isDateManual" placeholder="Date" label="Date" labelPlacement="stacked" [(ngModel)]="manualDate"
+          type="text" (ionChange)="onManualDateChange($event)"></ion-input>
+        <ion-toggle slot="end" [(ngModel)]="isDateManual" (ionChange)="isDateManualChange($event)"><small>Set
+            manually</small></ion-toggle>
+      </ion-item>
+      <ion-item>
+        <ion-icon (click)="attributeCheckClicked(Attribute.Lat)" slot="start"
+          [name]="isAttributeSelected(Attribute.Lat) ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
+        <ion-input *ngIf="!isLatManual" placeholder="Latitude" label="Latitude" labelPlacement="stacked"
+          [(ngModel)]="currentLat" type="number" [disabled]="true"></ion-input>
+        <ion-input *ngIf="isLatManual" placeholder="Latitude" label="Latitude" labelPlacement="stacked"
+          [(ngModel)]="manualLat" type="number" (ionChange)="onManualLatChange($event)"></ion-input>
+        <ion-toggle slot="end" [(ngModel)]="isLatManual" (ionChange)="isLatManualChange($event)"><small>Set
+            manually</small></ion-toggle>
+      </ion-item>
+      <ion-item>
+        <ion-icon (click)="attributeCheckClicked(Attribute.Lon)" slot="start"
+          [name]="isAttributeSelected(Attribute.Lon) ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
+        <ion-input *ngIf="!isLonManual" placeholder="Longitude" label="Longitude" labelPlacement="stacked"
+          [(ngModel)]="currentLon" type="number" [disabled]="true"></ion-input>
+        <ion-input *ngIf="isLonManual" placeholder="Longitude" label="Longitude" labelPlacement="stacked"
+          [(ngModel)]="manualLon" type="number" (ionChange)="onManualLonChange($event)"></ion-input>
+        <ion-toggle slot="end" [(ngModel)]="isLonManual" (ionChange)="isLonManualChange($event)"><small>Set
+            manually</small></ion-toggle>
+      </ion-item>
+      <ion-item>
+        <ion-icon (click)="attributeCheckClicked(Attribute.NumTaxonId)" slot="start"
+          [name]="isAttributeSelected(Attribute.NumTaxonId) ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
         <ion-input (ionChange)="numTaxonIdChange($event)" placeholder="Num. Taxon ID" label="Num. Taxon ID"
           labelPlacement="stacked" [(ngModel)]="num_taxon_id" type="number"></ion-input>
       </ion-item>
       <ion-item>
-        <ion-input (ionChange)="reqTaxonIdChange($event)" placeholder="Req. Taxon ID" label="Req. Taxon ID"
-          labelPlacement="stacked" [(ngModel)]="req_taxon_id" type="number"></ion-input>
+        <ion-icon (click)="attributeCheckClicked(Attribute.ReqTaxonId)" slot="start"
+          [name]="isAttributeSelected(Attribute.ReqTaxonId) ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
+        <ion-input *ngIf="!isReqTaxonIdAlphaNumeric" (ionChange)="reqTaxonIdChange($event)" placeholder="Req. Taxon ID"
+          label="Req. Taxon ID" labelPlacement="stacked" [(ngModel)]="req_taxon_id" [type]="'number'"></ion-input>
+        <ion-input *ngIf="isReqTaxonIdAlphaNumeric" (ionChange)="reqTaxonIdChange($event)" placeholder="Req. Taxon ID"
+          label="Req. Taxon ID" labelPlacement="stacked" [(ngModel)]="req_taxon_id_str" [type]="'text'"></ion-input>
+        <ion-toggle slot="end" [(ngModel)]="isReqTaxonIdAlphaNumeric"
+          (ionChange)="isReqTaxonIdAlphaNumericChange($event)"><small>Is alphanumeric</small></ion-toggle>
       </ion-item>
     </ion-content>
   </ng-template>
