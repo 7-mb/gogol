@@ -12,12 +12,6 @@ import { LoadingController } from '@ionic/angular';
 const store = new Storage();
 store.create();
 
-enum API {
-  Infoflora = 0,
-  WSL = 1,
-  Local = 2
-}
-
 enum Attribute {
   Images = "Images",
   LatLon = "Latitude / Longitude",
@@ -34,22 +28,22 @@ enum Attribute {
   imports: [IonicModule, CommonModule, FormsModule, ImageCropperModule]
 })
 export class MainPage {
-  API = API;
   Attribute = Attribute;
 
   //  https -> android:networkSecurityConfig="@xml/network_security_config"
 
+  public date: string = "";
   public response: string = "";
-  public attributesAll: string[] = [];
-  public attributesSelected: string[] = [];
+  public allAttributes: string[] = [];
+  public selectedAttributes: string[] = [];
   public num_taxon_id: number = 5;
   public req_taxon_id: number = 1046220;
-  public api: API = API.Infoflora;
-  public urlLocal: string = "http://127.0.0.1:8000/identify/images";
   public urlInfoflora: string = "https://florid.infoflora.ch/api/v1/public/identify/images";
-  public urlWsl: string = "https://florid.infoflora.ch/api/v1/public/identify/images";
-  public url: string = this.urlInfoflora;
-  public date: string = "";
+  public selectedApi: ApiStruct = { name: "Infoflora", url: this.urlInfoflora };
+  public customApis: ApiStruct[] = [];
+  public newCustomApi: ApiStruct = { name: "", url: "" };
+  public apiModalOpen: boolean = false;
+  public requestParameterModalOpen: boolean = false;
 
   constructor(public photoService: PhotoService,
     private http: HttpClient,
@@ -58,31 +52,31 @@ export class MainPage {
   ngOnInit() {
     this.initStorageValues();
     this.updateCoords();
-    this.attributesAll = Object.values(Attribute);
-    this.attributesSelected = this.attributesAll;
+    this.allAttributes = Object.values(Attribute);
+    this.selectedAttributes = this.allAttributes;
     this.setDate();
-    console.log(this.attributesAll);
+    console.log(this.allAttributes);
   }
 
   initStorageValues() {
-    store?.get('api').then(value => {
-      console.log("api value in storage: " + value);
-      value ? this.api = value : null;
+    store?.get('selectedApi').then(value => {
+      console.log("selectedApi value in storage: ", value);
+      value ? this.selectedApi = value : null;
     });
-    store?.get('url').then(value => {
-      console.log("url value in storage: " + value);
-      value ? this.url = value : null;
+    store?.get('customApis').then(value => {
+      console.log("customApis value in storage: ", value);
+      value ? this.customApis = value : null;
     });
-    store?.get('urlLocal').then(value => {
-      console.log("urlLocal value in storage: " + value);
-      value ? this.urlLocal = value : null;
+    store?.get('selectedAttributes').then(value => {
+      console.log("selectedAttributes value in storage: ", value);
+      value ? this.selectedAttributes = value : null;
     });
     store?.get('num_taxon_id').then(value => {
-      console.log("num_taxon_id value in storage: " + value);
+      console.log("num_taxon_id value in storage: ", value);
       value ? this.num_taxon_id = Number(value) : null;
     });
     store?.get('req_taxon_id').then(value => {
-      console.log("req_taxon_id value in storage: " + value);
+      console.log("req_taxon_id value in storage: ", value);
       value ? this.req_taxon_id = Number(value) : null;
     });
   }
@@ -96,17 +90,15 @@ export class MainPage {
   async submit() {
     this.setDate();
     const body: any = {};
-    if (this.attributesSelected.includes(Attribute.Images)) body.images = this.photoService.base64Photos;
-    if (this.attributesSelected.includes(Attribute.LatLon)) body.lat = this.photoService.currentLat;
-    if (this.attributesSelected.includes(Attribute.LatLon)) body.lon = this.photoService.currentLon;
-    if (this.attributesSelected.includes(Attribute.Date)) body.date = this.date;
-    if (this.attributesSelected.includes(Attribute.NumTaxonId)) body.num_taxon_ids = this.num_taxon_id;
-    if (this.attributesSelected.includes(Attribute.ReqTaxonId)) body.req_taxon_ids = [this.req_taxon_id];
+    if (this.selectedAttributes.includes(Attribute.Images)) body.images = this.photoService.base64Photos;
+    if (this.selectedAttributes.includes(Attribute.LatLon)) body.lat = this.photoService.currentLat;
+    if (this.selectedAttributes.includes(Attribute.LatLon)) body.lon = this.photoService.currentLon;
+    if (this.selectedAttributes.includes(Attribute.Date)) body.date = this.date;
+    if (this.selectedAttributes.includes(Attribute.NumTaxonId)) body.num_taxon_ids = this.num_taxon_id;
+    if (this.selectedAttributes.includes(Attribute.ReqTaxonId)) body.req_taxon_ids = [this.req_taxon_id];
     console.log(body);
 
-    let requestUrl = [API.Infoflora, API.WSL].includes(this.api) ?
-      'https://corsproxy.io/?' + encodeURIComponent(this.url) : this.url;
-
+    let requestUrl = 'https://corsproxy.io/?' + encodeURIComponent(this.selectedApi.url);
     let headers = { 'Content-Type': 'application/json' };
 
     const loading = await this.loadingCtrl.create();
@@ -133,34 +125,6 @@ export class MainPage {
     this.photoService.croppingImage = null;
     this.photoService.lastCropEvent = null;
     this.response = "";
-  }
-
-  apiChange(e: Event) {
-    console.log(e);
-    const api = (e as CustomEvent).detail.value;
-
-    switch (api) {
-      case API.Infoflora:
-        this.url = this.urlInfoflora
-        break;
-      case API.WSL:
-        this.url = this.urlWsl;
-        break;
-      case API.Local:
-        this.url = this.urlLocal;
-        break;
-      default:
-        break;
-    }
-
-    store?.set("api", this.api);
-    store?.set("url", this.url);
-  }
-
-  setLocalUrl() {
-    this.url = this.urlLocal;
-    store?.set("url", this.urlLocal);
-    store?.set("urlLocal", this.urlLocal);
   }
 
   numTaxonIdChange(e: Event) {
@@ -191,10 +155,55 @@ export class MainPage {
   updateCoords() {
     Geolocation.getCurrentPosition().then((coords) => {
       console.log('Current position:', coords);
-
       this.photoService.currentLat = coords.coords.latitude;
       this.photoService.currentLon = coords.coords.longitude;
     })
   }
 
+  selectedAttributesChange(e: Event) {
+    console.log("selectedAttributesChange", e);
+    const selectedAttributes = (e as CustomEvent).detail.value;
+    this.selectedAttributes = selectedAttributes;
+    store?.set("selectedAttributes", this.selectedAttributes);
+  }
+
+  configureApisClicked() {
+    console.log("configureApisClicked");
+    this.apiModalOpen = true;
+  }
+
+  addCustomApi() {
+    console.log("addCustomApi: " + this.newCustomApi.name + " - " + this.newCustomApi.url);
+    if (this.newCustomApi.name !== "" && this.newCustomApi.url !== "") {
+      this.customApis.push(this.newCustomApi);
+      store?.set("customApis", this.customApis);
+    }
+    this.newCustomApi = { name: "", url: "" };
+  }
+
+  removeCustomApi(api: ApiStruct) {
+    console.log("removeCustomApi: ", api);
+    if (this.selectedApi.name === api.name) {
+      this.resetApi();
+    }
+    this.customApis = this.customApis.filter(a => a.name !== api.name);
+    store?.set("customApis", this.customApis);
+  }
+
+  selectApi(api: ApiStruct) {
+    console.log("selectApi: ", api);
+    this.selectedApi = api;
+    store?.set("selectedApi", this.selectedApi);
+  }
+
+  resetApi() {
+    this.selectedApi = { name: "Infoflora", url: this.urlInfoflora };
+    store?.set("selectedApi", this.selectedApi);
+  }
+
+}
+
+export interface ApiStruct {
+  name: string;
+  url: string;
 }
