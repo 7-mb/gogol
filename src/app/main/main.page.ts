@@ -55,9 +55,9 @@ export class MainPage {
   public isReqTaxonIdAlphaNumeric: boolean = false;
   public urlInfoflora: string = "https://florid.infoflora.ch/api/v1/public/identify/images";
   public urlWsl: string = "https://speciesid.wsl.ch/florid";
-  public selectedApi: ApiStruct = { name: "Plants - Info Flora", url: this.urlInfoflora };
+  public selectedApi: ApiStruct = { name: "Plants - Info Flora", url: this.urlInfoflora, isLocal: false };
   public customApis: ApiStruct[] = [];
-  public newCustomApi: ApiStruct = { name: "", url: "" };
+  public newCustomApi: ApiStruct = { name: "", url: "", isLocal: false };
   public apiModalOpen: boolean = false;
   public requestParameterModalOpen: boolean = false;
 
@@ -153,7 +153,8 @@ export class MainPage {
     if (this.selectedAttributes.includes(Attribute.ReqTaxonId)) body.req_taxon_ids = this.isReqTaxonIdAlphaNumeric ? [this.req_taxon_id_str] : [this.req_taxon_id];
     console.log(body);
 
-    let requestUrl = 'https://corsproxy.io/?' + encodeURIComponent(this.selectedApi.url);
+    let requestUrl = this.selectedApi.isLocal ? this.selectedApi.url : 'https://corsproxy.io/?' + encodeURIComponent(this.selectedApi.url);
+
     let headers = { 'Content-Type': 'application/json' };
 
     const loading = await this.loadingCtrl.create();
@@ -168,7 +169,7 @@ export class MainPage {
         this.response = JSON.stringify(error, undefined, 2);
         this.loadingCtrl.dismiss();
         console.error('There was an error!', error);
-        alert('There was an error. Check response output.');
+        alert('There was an error: HTTP ' + error.status + ' ' + error.statusText + '. Check response output.');
       }
     })
   }
@@ -203,7 +204,7 @@ export class MainPage {
   isReqTaxonIdAlphaNumericChange(e: Event) {
     console.log("isReqTaxonIdAlphaNumericChange");
     console.log(e);
-    const value = (e as CustomEvent).detail.value;
+    const value = (e as CustomEvent).detail.checked;
     store?.set("isReqTaxonIdAlphaNumeric", value);
     if (this.isReqTaxonIdAlphaNumeric) {
       store?.set("req_taxon_id_str", this.req_taxon_id_str);
@@ -227,7 +228,7 @@ export class MainPage {
   isDateManualChange(e: Event) {
     console.log("isDateManualChange");
     console.log(e);
-    const isManual = (e as CustomEvent).detail.value;
+    const isManual = (e as CustomEvent).detail.checked;
     if (!this.isDateManual) {
       this.manualDate = this.date;
     }
@@ -238,7 +239,7 @@ export class MainPage {
   isLatManualChange(e: Event) {
     console.log("isLatManualChange");
     console.log(e);
-    const isManual = (e as CustomEvent).detail.value;
+    const isManual = (e as CustomEvent).detail.checked;
     if (!this.isLatManual) {
       this.manualLat = this.currentLat;
     }
@@ -249,7 +250,7 @@ export class MainPage {
   isLonManualChange(e: Event) {
     console.log("isLonManualChange");
     console.log(e);
-    const isManual = (e as CustomEvent).detail.value;
+    const isManual = (e as CustomEvent).detail.checked;
     if (!this.isLonManual) {
       this.manualLon = this.currentLon;
     }
@@ -336,7 +337,7 @@ export class MainPage {
       this.customApis.push(this.newCustomApi);
       store?.set("customApis", this.customApis);
     }
-    this.newCustomApi = { name: "", url: "" };
+    this.newCustomApi = { name: "", url: "", isLocal: false };
   }
 
   removeCustomApi(api: ApiStruct) {
@@ -355,12 +356,12 @@ export class MainPage {
   }
 
   setInfoFloraApi() {
-    this.selectedApi = { name: "Plants - Info Flora", url: this.urlInfoflora };
+    this.selectedApi = { name: "Plants - Info Flora", url: this.urlInfoflora, isLocal: false };
     store?.set("selectedApi", this.selectedApi);
   }
 
   setWslApi() {
-    this.selectedApi = { name: "Plants - WSL", url: this.urlWsl };
+    this.selectedApi = { name: "Plants - WSL", url: this.urlWsl, isLocal: false };
     store?.set("selectedApi", this.selectedApi);
   }
 
@@ -369,4 +370,5 @@ export class MainPage {
 export interface ApiStruct {
   name: string;
   url: string;
+  isLocal: boolean;
 }
