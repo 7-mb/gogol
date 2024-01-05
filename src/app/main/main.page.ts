@@ -50,9 +50,9 @@ export class MainPage {
   public allAttributes: string[] = [];
   public selectedAttributes: string[] = [];
   public num_taxon_id: number = 5;
-  public req_taxon_id: number = 1046220;
-  public req_taxon_id_str: string = "1046220";
-  public isReqTaxonIdAlphaNumeric: boolean = false;
+  public req_taxon_ids: number[] = [1046220];
+  public req_taxon_ids_str: string[] = ["1046220"];
+  public isReqTaxonIdsAlphaNumeric: boolean = false;
   public urlInfoflora: string = "https://florid.infoflora.ch/api/v1/public/identify/images";
   public urlWsl: string = "https://speciesid.wsl.ch/florid";
   public selectedApi: ApiStruct = { name: "Plants - Info Flora", url: this.urlInfoflora, isLocal: false };
@@ -94,17 +94,17 @@ export class MainPage {
       console.log("num_taxon_id value in storage: ", value);
       value ? this.num_taxon_id = Number(value) : null;
     });
-    store?.get('req_taxon_id').then(value => {
-      console.log("req_taxon_id value in storage: ", value);
-      value && !isNaN(value) ? this.req_taxon_id = Number(value) : null;
+    store?.get('req_taxon_ids').then(value => {
+      console.log("req_taxon_ids value in storage: ", value);
+      value ? this.req_taxon_ids = value : null;
     });
-    store?.get('isReqTaxonIdAlphaNumeric').then(value => {
-      console.log("isReqTaxonIdAlphaNumeric value in storage: ", value);
-      value ? this.isReqTaxonIdAlphaNumeric = value : null;
+    store?.get('isReqTaxonIdsAlphaNumeric').then(value => {
+      console.log("isReqTaxonIdsAlphaNumeric value in storage: ", value);
+      value ? this.isReqTaxonIdsAlphaNumeric = value : null;
     });
-    store?.get('req_taxon_id_str').then(value => {
-      console.log("req_taxon_id_str value in storage: ", value);
-      value ? this.req_taxon_id_str = value : null;
+    store?.get('req_taxon_ids_str').then(value => {
+      console.log("req_taxon_ids_str value in storage: ", value);
+      value ? this.req_taxon_ids_str = value : null;
     });
 
     store?.get('isDateManual').then(value => {
@@ -150,7 +150,7 @@ export class MainPage {
     if (this.selectedAttributes.includes(Attribute.Lon)) body.lon = this.isLonManual ? this.manualLon : this.currentLon;
     if (this.selectedAttributes.includes(Attribute.Date)) body.date = this.isDateManual ? this.manualDate : this.date;
     if (this.selectedAttributes.includes(Attribute.NumTaxonId)) body.num_taxon_ids = this.num_taxon_id;
-    if (this.selectedAttributes.includes(Attribute.ReqTaxonId)) body.req_taxon_ids = this.isReqTaxonIdAlphaNumeric ? [this.req_taxon_id_str] : [this.req_taxon_id];
+    if (this.selectedAttributes.includes(Attribute.ReqTaxonId)) body.req_taxon_ids = this.isReqTaxonIdsAlphaNumeric ? this.req_taxon_ids_str : this.req_taxon_ids;
     console.log(body);
 
     let requestUrl = this.selectedApi.isLocal ? this.selectedApi.url : 'https://corsproxy.io/?' + encodeURIComponent(this.selectedApi.url);
@@ -190,26 +190,37 @@ export class MainPage {
     store?.set("num_taxon_id", id);
   }
 
-  reqTaxonIdChange(e: Event) {
-    console.log("reqTaxonIdChange");
+  reqTaxonIdsChange(e: Event) {
+    console.log("reqTaxonIdsChange");
     console.log(e);
     const value = (e as CustomEvent).detail.value;
-    if (this.isReqTaxonIdAlphaNumeric) {
-      store?.set("req_taxon_id_str", value);
+    const values: (number | string)[] = value.split(',');
+    const uniqueValues = values.filter((value, index, self) => self.indexOf(value) === index);
+
+    console.log(value);
+    console.log(values);
+    console.log(uniqueValues);
+
+    if (this.isReqTaxonIdsAlphaNumeric) {
+      this.req_taxon_ids_str = uniqueValues.map((value) => value.toString());
+      console.log(this.req_taxon_ids_str);
+      store?.set("req_taxon_ids_str", this.req_taxon_ids_str);
     } else {
-      store?.set("req_taxon_id", value);
+      this.req_taxon_ids = uniqueValues.map((value) => parseInt(value as string, 10)).filter((value) => !isNaN(value as number));
+      console.log(this.req_taxon_ids);
+      store?.set("req_taxon_ids", this.req_taxon_ids);
     }
   }
 
-  isReqTaxonIdAlphaNumericChange(e: Event) {
-    console.log("isReqTaxonIdAlphaNumericChange");
+  isReqTaxonIdsAlphaNumericChange(e: Event) {
+    console.log("isReqTaxonIdsAlphaNumericChange");
     console.log(e);
     const value = (e as CustomEvent).detail.checked;
-    store?.set("isReqTaxonIdAlphaNumeric", value);
-    if (this.isReqTaxonIdAlphaNumeric) {
-      store?.set("req_taxon_id_str", this.req_taxon_id_str);
+    store?.set("isReqTaxonIdsAlphaNumeric", value);
+    if (this.isReqTaxonIdsAlphaNumeric) {
+      store?.set("req_taxon_ids_str", this.req_taxon_ids_str);
     } else {
-      store?.set("req_taxon_id", this.req_taxon_id);
+      store?.set("req_taxon_ids", this.req_taxon_ids);
     }
   }
 

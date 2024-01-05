@@ -186,7 +186,7 @@
           [(ngModel)]="currentLat" type="number" [disabled]="true"></ion-input>
         <ion-input *ngIf="isLatManual" placeholder="Latitude" label="Latitude" labelPlacement="stacked"
           [(ngModel)]="manualLat" type="number" (ionChange)="onManualLatChange($event)"></ion-input>
-        <ion-toggle slot="end" [checked]="isLatManual" labelPlacement="stacked"
+        <ion-toggle slot="end" [checked]="isLatManual" [(ngModel)]="isLatManual" labelPlacement="stacked"
           (ionChange)="isLatManualChange($event)"><small>Set
             manually</small></ion-toggle>
       </ion-item>
@@ -197,7 +197,7 @@
           [(ngModel)]="currentLon" type="number" [disabled]="true"></ion-input>
         <ion-input *ngIf="isLonManual" placeholder="Longitude" label="Longitude" labelPlacement="stacked"
           [(ngModel)]="manualLon" type="number" (ionChange)="onManualLonChange($event)"></ion-input>
-        <ion-toggle slot="end" [checked]="isLonManual" labelPlacement="stacked"
+        <ion-toggle slot="end" [checked]="isLonManual" [(ngModel)]="isLonManual" labelPlacement="stacked"
           (ionChange)="isLonManualChange($event)"><small>Set
             manually</small></ion-toggle>
       </ion-item>
@@ -210,16 +210,16 @@
       <ion-item lines="none">
         <ion-icon (click)="attributeCheckClicked(Attribute.ReqTaxonId)" slot="start"
           [name]="isAttributeSelected(Attribute.ReqTaxonId) ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
-        <ion-input *ngIf="!isReqTaxonIdAlphaNumeric" (ionChange)="reqTaxonIdChange($event)"
-          placeholder="Req. Taxon ID" label="Req. Taxon ID" labelPlacement="stacked"
-          [(ngModel)]="req_taxon_id" [type]="'number'"></ion-input>
-        <ion-input *ngIf="isReqTaxonIdAlphaNumeric" (ionChange)="reqTaxonIdChange($event)"
-          placeholder="Req. Taxon ID" label="Req. Taxon ID" labelPlacement="stacked"
-          [(ngModel)]="req_taxon_id_str" [type]="'text'"></ion-input>
-        <ion-toggle slot="end" [checked]="isReqTaxonIdAlphaNumeric" labelPlacement="stacked"
-          (ionChange)="isReqTaxonIdAlphaNumericChange($event)"><small>Alphanumeric</small></ion-toggle>
+        <ion-input *ngIf="!isReqTaxonIdsAlphaNumeric" (ionChange)="reqTaxonIdsChange($event)"
+          placeholder="Req. Taxon ID" label="Req. Taxon IDs (separate by commas)" labelPlacement="stacked"
+          [ngModel]="req_taxon_ids" [type]="'text'"></ion-input>
+        <ion-input *ngIf="isReqTaxonIdsAlphaNumeric" (ionChange)="reqTaxonIdsChange($event)" placeholder="Req. Taxon ID"
+          label="Req. Taxon IDs (separate by commas)" labelPlacement="stacked" [ngModel]="req_taxon_ids_str"
+          [type]="'text'"></ion-input>
+        <ion-toggle slot="end" [checked]="isReqTaxonIdsAlphaNumeric" [(ngModel)]="isReqTaxonIdsAlphaNumeric"
+          labelPlacement="stacked"
+          (ionChange)="isReqTaxonIdsAlphaNumericChange($event)"><small>Alphanumeric</small></ion-toggle>
       </ion-item>
-
 
     </ion-content>
   </ng-template>
