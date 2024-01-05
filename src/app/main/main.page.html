@@ -38,14 +38,14 @@
       <ion-label>Configure Request Parameters</ion-label>
     </ion-item>
   </ion-list>
-  <ion-grid id="image-grid" *ngIf="selectedAttributes.includes(Attribute.Images)">
+  <ion-grid id="image-grid">
     <ion-row>
       <ion-col size="6" *ngFor="let photo of photoService.photos; index as position">
         <ion-img [src]="photo"></ion-img>
       </ion-col>
     </ion-row>
   </ion-grid>
-  <ion-fab vertical="bottom" horizontal="end" slot="fixed" *ngIf="selectedAttributes.includes(Attribute.Images)">
+  <ion-fab vertical="bottom" horizontal="end" slot="fixed">
     <ion-fab-button (click)="addPhotoToGallery()" [disabled]="photoService.photos.length >= 5">
       <ion-icon name="camera"></ion-icon>
     </ion-fab-button>
@@ -163,52 +163,61 @@
       </ion-toolbar>
     </ion-header>
     <ion-content>
-      <ion-item>
-        <ion-icon (click)="attributeCheckClicked(Attribute.Images)" slot="start"
+      <ion-item lines="none">
+        <ion-icon (click)="attributeCheckClicked(Attribute.Images)" slot="start" class="check-attribute"
           [name]="isAttributeSelected(Attribute.Images) ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
         <ion-label>Images</ion-label>
       </ion-item>
-      <ion-item>
-        <ion-icon (click)="attributeCheckClicked(Attribute.Date)" slot="start"
+      <ion-item></ion-item>
+      <ion-item lines="none">
+        <ion-icon (click)="attributeCheckClicked(Attribute.Date)" slot="start" class="check-attribute"
           [name]="isAttributeSelected(Attribute.Date) ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
         <ion-input *ngIf="!isDateManual" placeholder="Date" label="Date" labelPlacement="stacked" [(ngModel)]="date"
           type="text" [disabled]="true"></ion-input>
         <ion-input *ngIf="isDateManual" placeholder="Date" label="Date" labelPlacement="stacked"
           [(ngModel)]="manualDate" type="text" (ionChange)="onManualDateChange($event)"></ion-input>
-        <ion-toggle slot="end" [checked]="isDateManual" labelPlacement="stacked"
-          (ionChange)="isDateManualChange($event)"><small>Set
-            manually</small></ion-toggle>
       </ion-item>
+
       <ion-item>
-        <ion-icon (click)="attributeCheckClicked(Attribute.Lat)" slot="start"
+        <ion-toggle slot="end" [checked]="isDateManual" [(ngModel)]="isDateManual"
+          (ionChange)="isDateManualChange($event)"><small>Set manually</small></ion-toggle>
+      </ion-item>
+
+      <ion-item lines="none">
+        <ion-icon (click)="attributeCheckClicked(Attribute.Lat)" slot="start" class="check-attribute"
           [name]="isAttributeSelected(Attribute.Lat) ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
         <ion-input *ngIf="!isLatManual" placeholder="Latitude" label="Latitude" labelPlacement="stacked"
           [(ngModel)]="currentLat" type="number" [disabled]="true"></ion-input>
         <ion-input *ngIf="isLatManual" placeholder="Latitude" label="Latitude" labelPlacement="stacked"
           [(ngModel)]="manualLat" type="number" (ionChange)="onManualLatChange($event)"></ion-input>
-        <ion-toggle slot="end" [checked]="isLatManual" [(ngModel)]="isLatManual" labelPlacement="stacked"
-          (ionChange)="isLatManualChange($event)"><small>Set
-            manually</small></ion-toggle>
+
       </ion-item>
       <ion-item>
-        <ion-icon (click)="attributeCheckClicked(Attribute.Lon)" slot="start"
+        <ion-toggle slot="end" [checked]="isLatManual" [(ngModel)]="isLatManual"
+          (ionChange)="isLatManualChange($event)"><small>Set manually</small></ion-toggle>
+      </ion-item>
+      <ion-item lines="none">
+        <ion-icon (click)="attributeCheckClicked(Attribute.Lon)" slot="start" class="check-attribute"
           [name]="isAttributeSelected(Attribute.Lon) ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
         <ion-input *ngIf="!isLonManual" placeholder="Longitude" label="Longitude" labelPlacement="stacked"
           [(ngModel)]="currentLon" type="number" [disabled]="true"></ion-input>
         <ion-input *ngIf="isLonManual" placeholder="Longitude" label="Longitude" labelPlacement="stacked"
           [(ngModel)]="manualLon" type="number" (ionChange)="onManualLonChange($event)"></ion-input>
-        <ion-toggle slot="end" [checked]="isLonManual" [(ngModel)]="isLonManual" labelPlacement="stacked"
-          (ionChange)="isLonManualChange($event)"><small>Set
-            manually</small></ion-toggle>
+
       </ion-item>
       <ion-item>
-        <ion-icon (click)="attributeCheckClicked(Attribute.NumTaxonId)" slot="start"
-          [name]="isAttributeSelected(Attribute.NumTaxonId) ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
-        <ion-input (ionChange)="numTaxonIdChange($event)" placeholder="Enter num. Taxon ID" label="Num. Taxon ID"
-          labelPlacement="stacked" [(ngModel)]="num_taxon_id" type="number"></ion-input>
+        <ion-toggle slot="end" [checked]="isLonManual" [(ngModel)]="isLonManual"
+          (ionChange)="isLonManualChange($event)"><small>Set manually</small></ion-toggle>
       </ion-item>
       <ion-item lines="none">
-        <ion-icon (click)="attributeCheckClicked(Attribute.ReqTaxonId)" slot="start"
+        <ion-icon (click)="attributeCheckClicked(Attribute.NumTaxonId)" slot="start" class="check-attribute"
+          [name]="isAttributeSelected(Attribute.NumTaxonId) ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
+        <ion-input (ionChange)="numTaxonIdChange($event)" placeholder="Enter num. Taxon ID" label="Num. Taxon IDs"
+          labelPlacement="stacked" [(ngModel)]="num_taxon_id" type="number"></ion-input>
+      </ion-item>
+      <ion-item></ion-item>
+      <ion-item lines="none">
+        <ion-icon (click)="attributeCheckClicked(Attribute.ReqTaxonId)" slot="start" class="check-attribute"
           [name]="isAttributeSelected(Attribute.ReqTaxonId) ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
         <ion-input *ngIf="!isReqTaxonIdsAlphaNumeric" (ionChange)="reqTaxonIdsChange($event)"
           placeholder="Req. Taxon ID" label="Req. Taxon IDs (separate by commas)" labelPlacement="stacked"
@@ -216,9 +225,11 @@
         <ion-input *ngIf="isReqTaxonIdsAlphaNumeric" (ionChange)="reqTaxonIdsChange($event)" placeholder="Req. Taxon ID"
           label="Req. Taxon IDs (separate by commas)" labelPlacement="stacked" [ngModel]="req_taxon_ids_str"
           [type]="'text'"></ion-input>
+      </ion-item>
+
+      <ion-item>
         <ion-toggle slot="end" [checked]="isReqTaxonIdsAlphaNumeric" [(ngModel)]="isReqTaxonIdsAlphaNumeric"
-          labelPlacement="stacked"
-          (ionChange)="isReqTaxonIdsAlphaNumericChange($event)"><small>Alphanumeric</small></ion-toggle>
+          (ionChange)="isReqTaxonIdsAlphaNumericChange($event)"><small>Use alphanumeric IDs</small></ion-toggle>
       </ion-item>
 
     </ion-content>
