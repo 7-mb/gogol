@@ -5,8 +5,12 @@ const config: CapacitorConfig = {
   appName: 'SpeciesID',
   webDir: 'www',
   server: {
-    androidScheme: 'https'
-  }
+    androidScheme: 'https',
+    cleartext: true
+  },
+  android: {
+    allowMixedContent: true
+  },
 };
 
 export default config;

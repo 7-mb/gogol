@@ -4,10 +4,11 @@ import { PhotoService } from '../services/photo.service';
 import { CommonModule } from '@angular/common';
 import { Geolocation } from '@capacitor/geolocation';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
+//import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Storage } from '@ionic/storage';
 import { ImageCropperModule } from 'ngx-image-cropper';
 import { LoadingController } from '@ionic/angular';
+//import { format } from 'path';
 
 const store = new Storage();
 store.create();
@@ -64,7 +65,7 @@ export class MainPage {
   loadingCtrl: LoadingController;
 
   constructor(public photoService: PhotoService,
-    private http: HttpClient) {
+    /*private http: HttpClient*/) {
     this.loadingCtrl = new LoadingController();
   }
 
@@ -75,6 +76,29 @@ export class MainPage {
     this.selectedAttributes = this.allAttributes;
     this.setDate();
     console.log(this.allAttributes);
+
+
+    // Die URL, von der du Daten abrufen möchtest
+  /*var url = 'http://192.168.1.22:3000/';
+
+  // GET-Anfrage mit fetch durchführen
+  fetch(url)
+    .then(response => {
+      // Überprüfen, ob die Anfrage erfolgreich war (Status-Code 200)
+      if (!response.ok) {
+        throw new Error('Fehler beim Abrufen der Daten');
+      }
+      // Das Ergebnis in JSON umwandeln und in die Konsole schreiben
+      return response.json();
+    })
+    .then(data => {
+      this.response = 'OKK: ' + JSON.stringify(data);
+    })
+    .catch(error => {
+      this.response = 'NOK: ' + error.message;
+    });
+
+    */
   }
 
   initStorageValues() {
@@ -155,7 +179,7 @@ export class MainPage {
 
     let requestUrl = this.selectedApi.isLocal ? this.selectedApi.url : 'https://corsproxy.io/?' + encodeURIComponent(this.selectedApi.url);
 
-    let headers = { 'Content-Type': 'application/json' };
+    /*let headers = { 'Content-Type': 'application/json' };
 
     const loading = await this.loadingCtrl.create();
     await loading.present();
@@ -171,7 +195,34 @@ export class MainPage {
         console.error('There was an error!', error);
         alert('There was an error: HTTP ' + error.status + ' ' + error.statusText + '. Check response output.');
       }
+    })*/
+
+    const loading = await this.loadingCtrl.create();
+    await loading.present();
+
+    const headers = {
+      'Accept': '*/*',
+      'Content-Type': 'application/json',
+    };
+
+    fetch(requestUrl, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify(body),
     })
+      .then(response => response.json())
+      .then(data => {
+        this.response = JSON.stringify(data, undefined, 2);
+        this.loadingCtrl.dismiss();
+      })
+      .catch(error => {
+        this.response = JSON.stringify(error, undefined, 2);
+        this.loadingCtrl.dismiss();
+        console.error('There was an error!', error);
+        alert('There was an error: HTTP ' + error.status + ' ' + error.statusText + '. Check response output.');
+      });
+
+
   }
 
   clear() {
