@@ -106,7 +106,7 @@
           <ion-icon (click)="setInfoFloraApi()" slot="start"
             [name]="selectedApi.name === 'Plants - Info Flora' ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
           <ion-label (click)="setInfoFloraApi()">
-            <h3 class="url-h3"><ion-icon name="earth-outline"></ion-icon>Plants - Info Flora</h3>
+            <h3>Plants - Info Flora</h3>
             <p><small>{{urlInfoflora}}</small></p>
           </ion-label>
         </ion-item>
@@ -114,7 +114,7 @@
           <ion-icon (click)="setWslApi()" slot="start"
             [name]="selectedApi.name === 'Plants - WSL' ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
           <ion-label (click)="setWslApi()">
-            <h3 class="url-h3"><ion-icon name="earth-outline"></ion-icon>Plants - WSL</h3>
+            <h3>Plants - WSL</h3>
             <p><small>{{urlWsl}}</small></p>
           </ion-label>
         </ion-item>
@@ -122,8 +122,7 @@
           <ion-icon (click)="selectApi(customApi)" slot="start"
             [name]="selectedApi.name === customApi.name ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
           <ion-label (click)="selectApi(customApi)">
-            <h3 class="url-h3"><ion-icon
-                [name]="customApi.isLocal ? 'business-outline' : 'earth-outline'"></ion-icon>{{customApi.name}}</h3>
+            <h3>{{customApi.name}}</h3>
             <p><small>{{customApi.url}}</small></p>
           </ion-label>
           <ion-icon slot="end" name="close-outline" (click)="removeCustomApi(customApi)"></ion-icon>
@@ -141,9 +140,6 @@
       <ion-item>
         <ion-input [(ngModel)]="newCustomApi.url" placeholder="Enter URL (start with https://)" label="URL"
           labelPlacement="stacked"></ion-input>
-      </ion-item>
-      <ion-item>
-        <ion-toggle [checked]="newCustomApi.isLocal" [(ngModel)]="newCustomApi.isLocal">Is a local URL</ion-toggle>
       </ion-item>
       <ion-button (click)="addCustomApi()" fill="clear" expand="full"
         [disabled]="newCustomApi.name === '' || newCustomApi.url === ''">Add

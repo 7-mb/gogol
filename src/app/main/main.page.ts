@@ -4,11 +4,10 @@ import { PhotoService } from '../services/photo.service';
 import { CommonModule } from '@angular/common';
 import { Geolocation } from '@capacitor/geolocation';
 import { FormsModule } from '@angular/forms';
-//import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Storage } from '@ionic/storage';
 import { ImageCropperModule } from 'ngx-image-cropper';
 import { LoadingController } from '@ionic/angular';
-//import { format } from 'path';
+import { Capacitor } from '@capacitor/core';
 
 const store = new Storage();
 store.create();
@@ -32,8 +31,6 @@ enum Attribute {
 export class MainPage {
   Attribute = Attribute;
 
-  //  https -> android:networkSecurityConfig="@xml/network_security_config"
-
   public date: string = "";
   public manualDate: string = "";
 
@@ -56,49 +53,25 @@ export class MainPage {
   public isReqTaxonIdsAlphaNumeric: boolean = false;
   public urlInfoflora: string = "https://florid.infoflora.ch/api/v1/public/identify/images";
   public urlWsl: string = "https://speciesid.wsl.ch/florid";
-  public selectedApi: ApiStruct = { name: "Plants - Info Flora", url: this.urlInfoflora, isLocal: false };
+  public selectedApi: ApiStruct = { name: "Plants - Info Flora", url: this.urlInfoflora };
   public customApis: ApiStruct[] = [];
-  public newCustomApi: ApiStruct = { name: "", url: "", isLocal: false };
+  public newCustomApi: ApiStruct = { name: "", url: "" };
   public apiModalOpen: boolean = false;
   public requestParameterModalOpen: boolean = false;
 
   loadingCtrl: LoadingController;
 
-  constructor(public photoService: PhotoService,
-    /*private http: HttpClient*/) {
+  constructor(public photoService: PhotoService) {
     this.loadingCtrl = new LoadingController();
   }
 
   ngOnInit() {
-    this.initStorageValues();
-    this.updateCoords();
+    console.log("Capacitor platform is: ", JSON.stringify(Capacitor.getPlatform()));
     this.allAttributes = Object.values(Attribute);
     this.selectedAttributes = this.allAttributes;
     this.setDate();
-    console.log(this.allAttributes);
-
-
-    // Die URL, von der du Daten abrufen möchtest
-  /*var url = 'http://192.168.1.22:3000/';
-
-  // GET-Anfrage mit fetch durchführen
-  fetch(url)
-    .then(response => {
-      // Überprüfen, ob die Anfrage erfolgreich war (Status-Code 200)
-      if (!response.ok) {
-        throw new Error('Fehler beim Abrufen der Daten');
-      }
-      // Das Ergebnis in JSON umwandeln und in die Konsole schreiben
-      return response.json();
-    })
-    .then(data => {
-      this.response = 'OKK: ' + JSON.stringify(data);
-    })
-    .catch(error => {
-      this.response = 'NOK: ' + error.message;
-    });
-
-    */
+    this.initStorageValues();
+    setInterval(() => this.updateCoords(), 3000);
   }
 
   initStorageValues() {
@@ -161,7 +134,6 @@ export class MainPage {
   addPhotoToGallery() {
     this.photoService.addNewToGallery();
     console.log(this.photoService.photos);
-    this.updateCoords();
   }
 
   async submit() {
@@ -177,25 +149,9 @@ export class MainPage {
     if (this.selectedAttributes.includes(Attribute.ReqTaxonId)) body.req_taxon_ids = this.isReqTaxonIdsAlphaNumeric ? this.req_taxon_ids_str : this.req_taxon_ids;
     console.log(body);
 
-    let requestUrl = this.selectedApi.isLocal ? this.selectedApi.url : 'https://corsproxy.io/?' + encodeURIComponent(this.selectedApi.url);
-
-    /*let headers = { 'Content-Type': 'application/json' };
-
-    const loading = await this.loadingCtrl.create();
-    await loading.present();
-
-    this.http.post<any>(requestUrl, body, { headers }).subscribe({
-      next: data => {
-        this.response = JSON.stringify(data, undefined, 2);
-        this.loadingCtrl.dismiss();
-      },
-      error: error => {
-        this.response = JSON.stringify(error, undefined, 2);
-        this.loadingCtrl.dismiss();
-        console.error('There was an error!', error);
-        alert('There was an error: HTTP ' + error.status + ' ' + error.statusText + '. Check response output.');
-      }
-    })*/
+    let requestUrl = Capacitor.getPlatform() === 'web' ?
+      'https://corsproxy.io/?' + encodeURIComponent(this.selectedApi.url) :
+      this.selectedApi.url;
 
     const loading = await this.loadingCtrl.create();
     await loading.present();
@@ -221,7 +177,6 @@ export class MainPage {
         console.error('There was an error!', error);
         alert('There was an error: HTTP ' + error.status + ' ' + error.statusText + '. Check response output.');
       });
-
 
   }
 
@@ -343,7 +298,7 @@ export class MainPage {
 
   updateCoords() {
     Geolocation.getCurrentPosition().then((coords) => {
-      console.log('Current position:', coords);
+      console.log('Current position: ' + coords.coords.latitude + ", " + coords.coords.longitude);
       this.currentLat = coords.coords.latitude;
       this.currentLon = coords.coords.longitude;
       if (!this.isLatManual) {
@@ -399,7 +354,7 @@ export class MainPage {
       this.customApis.push(this.newCustomApi);
       store?.set("customApis", this.customApis);
     }
-    this.newCustomApi = { name: "", url: "", isLocal: false };
+    this.newCustomApi = { name: "", url: "" };
   }
 
   removeCustomApi(api: ApiStruct) {
@@ -418,12 +373,12 @@ export class MainPage {
   }
 
   setInfoFloraApi() {
-    this.selectedApi = { name: "Plants - Info Flora", url: this.urlInfoflora, isLocal: false };
+    this.selectedApi = { name: "Plants - Info Flora", url: this.urlInfoflora };
     store?.set("selectedApi", this.selectedApi);
   }
 
   setWslApi() {
-    this.selectedApi = { name: "Plants - WSL", url: this.urlWsl, isLocal: false };
+    this.selectedApi = { name: "Plants - WSL", url: this.urlWsl };
     store?.set("selectedApi", this.selectedApi);
   }
 
@@ -432,5 +387,4 @@ export class MainPage {
 export interface ApiStruct {
   name: string;
   url: string;
-  isLocal: boolean;
 }
