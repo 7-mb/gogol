@@ -68,8 +68,8 @@
       <ion-toolbar>
         <ion-title>Crop Image</ion-title>
         <ion-buttons slot="end">
-          <ion-button (click)="photoService.imageNotCropped()">Skip</ion-button>
-          <ion-button (click)="photoService.processImage()">
+          <ion-button (click)="photoService.imageNotCropped()" [disabled]="photoService.isCropping">Skip</ion-button>
+          <ion-button (click)="photoService.processImage()" [disabled]="photoService.isCropping">
             <ion-icon slot="icon-only" name="checkmark"></ion-icon>
           </ion-button>
         </ion-buttons>
@@ -79,13 +79,13 @@
       <image-cropper [imageBase64]="photoService.croppingImage" [maintainAspectRatio]="true" [aspectRatio]="1 / 1"
         format="png" [hideResizeSquares]="photoService.isMobile" [transform]="photoService.transform" [autoCrop]="true"
         (imageCropped)="photoService.imageCropped($event)" (loadImageFailed)="photoService.loadImageFailed()"
-        (imageLoaded)="photoService.imageLoaded()"></image-cropper>
+        (imageLoaded)="photoService.imageLoaded()" (startCropImage)="photoService.startCropImage()"></image-cropper>
 
     </ion-content>
   </ng-template>
 </ion-modal>
 
-<ion-modal [isOpen]="apiModalOpen">
+<ion-modal [isOpen]="apiModalOpen" [backdropDismiss]="false">
   <ng-template>
     <ion-header>
       <ion-toolbar>
@@ -148,7 +148,7 @@
   </ng-template>
 </ion-modal>
 
-<ion-modal [isOpen]="requestParameterModalOpen">
+<ion-modal [isOpen]="requestParameterModalOpen" [backdropDismiss]="false">
   <ng-template>
     <ion-header>
       <ion-toolbar>

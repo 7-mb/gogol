@@ -16,6 +16,7 @@ export class PhotoService {
   lastCropEvent: ImageCroppedEvent | null = null;
   transform: ImageTransform = {};
   isMobile = Capacitor.getPlatform() !== 'web';
+  isCropping: boolean = false;
 
   capturedImage: Photo | null = null;
 
@@ -69,9 +70,15 @@ export class PhotoService {
     this.loadingCtrl.dismiss();
   }
 
+  startCropImage() {
+    console.log("startCropImage");
+    this.isCropping = true;
+  }
+
   imageCropped(event: ImageCroppedEvent) {
     console.log("imageCropped");
     this.lastCropEvent = event;
+    this.isCropping = false;
   }
 
   imageNotCropped() {

@@ -37,8 +37,8 @@ export class MainPage {
   public currentLat: number = 47.36667;
   public currentLon: number = 8.25;
 
-  public manualLat: number = 47.36667;
-  public manualLon: number = 8.25;
+  public manualLat: number = this.currentLat;
+  public manualLon: number = this.currentLon;
 
   public isDateManual: boolean = false;
   public isLatManual: boolean = false;
@@ -70,65 +70,39 @@ export class MainPage {
     this.allAttributes = Object.values(Attribute);
     this.selectedAttributes = this.allAttributes;
     this.setDate();
-    this.initStorageValues();
+    this.initStoreValues();
     setInterval(() => this.updateCoords(), 3000);
   }
 
-  initStorageValues() {
-    store?.get('selectedApi').then(value => {
-      console.log("selectedApi value in storage: ", value);
-      value ? this.selectedApi = value : null;
-    });
-    store?.get('customApis').then(value => {
-      console.log("customApis value in storage: ", value);
-      value ? this.customApis = value : null;
-    });
-    store?.get('selectedAttributes').then(value => {
-      console.log("selectedAttributes value in storage: ", value);
-      value ? this.selectedAttributes = value : null;
-    });
-    store?.get('num_taxon_id').then(value => {
-      console.log("num_taxon_id value in storage: ", value);
-      value ? this.num_taxon_id = Number(value) : null;
-    });
-    store?.get('req_taxon_ids').then(value => {
-      console.log("req_taxon_ids value in storage: ", value);
-      value ? this.req_taxon_ids = value : null;
-    });
-    store?.get('isReqTaxonIdsAlphaNumeric').then(value => {
-      console.log("isReqTaxonIdsAlphaNumeric value in storage: ", value);
-      value ? this.isReqTaxonIdsAlphaNumeric = value : null;
-    });
-    store?.get('req_taxon_ids_str').then(value => {
-      console.log("req_taxon_ids_str value in storage: ", value);
-      value ? this.req_taxon_ids_str = value : null;
-    });
+  initStoreValues() {
+    const storeValueNames: (keyof MainPage)[] = [
+      'selectedApi',
+      'customApis',
+      'selectedAttributes',
+      'num_taxon_id',
+      'req_taxon_ids',
+      'isReqTaxonIdsAlphaNumeric',
+      'req_taxon_ids_str',
+      'isDateManual',
+      'isLatManual',
+      'isLonManual',
+      'manualDate',
+      'manualLat',
+      'manualLon'
+    ];
+    storeValueNames.forEach(name => this.initStoreValue(name));
+  }
 
-    store?.get('isDateManual').then(value => {
-      console.log("isDateManual value in storage: ", value);
-      value ? this.isDateManual = value : null;
-    });
-    store?.get('isLatManual').then(value => {
-      console.log("isLatManual value in storage: ", value);
-      value ? this.isLatManual = value : null;
-    });
-    store?.get('isLonManual').then(value => {
-      console.log("isLonManual value in storage: ", value);
-      value ? this.isLonManual = value : null;
-    });
+  async initStoreValue<K extends keyof MainPage>(property: K): Promise<void> {
+    const value: MainPage[K] = await store?.get(property);
+    console.log(`${property} value in storage: `, value);
+    if (value !== null && value !== undefined) {
+      this[property] = value as this[K];
+    }
+  }
 
-    store?.get('manualDate').then(value => {
-      console.log("manualDate value in storage: ", value);
-      value ? this.manualDate = value : null;
-    });
-    store?.get('manualLat').then(value => {
-      console.log("manualLat value in storage: ", value);
-      value ? this.manualLat = value : null;
-    });
-    store?.get('manualLon').then(value => {
-      console.log("manualLon value in storage: ", value);
-      value ? this.manualLon = value : null;
-    });
+  async setStoreValue<K extends keyof MainPage>(name: K, value: any) {
+    await store?.set(name, value);
   }
 
   addPhotoToGallery() {
@@ -177,7 +151,6 @@ export class MainPage {
         console.error('There was an error!', error);
         alert('There was an error: HTTP ' + error.status + ' ' + error.statusText + '. Check response output.');
       });
-
   }
 
   clear() {
@@ -193,7 +166,7 @@ export class MainPage {
     console.log("numTaxonIdChange");
     console.log(e);
     const id = (e as CustomEvent).detail.value;
-    store?.set("num_taxon_id", id);
+    this.setStoreValue("num_taxon_id", id);
   }
 
   reqTaxonIdsChange(e: Event) {
@@ -210,11 +183,11 @@ export class MainPage {
     if (this.isReqTaxonIdsAlphaNumeric) {
       this.req_taxon_ids_str = uniqueValues.map((value) => value.toString());
       console.log(this.req_taxon_ids_str);
-      store?.set("req_taxon_ids_str", this.req_taxon_ids_str);
+      this.setStoreValue("req_taxon_ids_str", this.req_taxon_ids_str);
     } else {
       this.req_taxon_ids = uniqueValues.map((value) => parseInt(value as string, 10)).filter((value) => !isNaN(value as number));
       console.log(this.req_taxon_ids);
-      store?.set("req_taxon_ids", this.req_taxon_ids);
+      this.setStoreValue("req_taxon_ids", this.req_taxon_ids);
     }
   }
 
@@ -222,11 +195,11 @@ export class MainPage {
     console.log("isReqTaxonIdsAlphaNumericChange");
     console.log(e);
     const value = (e as CustomEvent).detail.checked;
-    store?.set("isReqTaxonIdsAlphaNumeric", value);
+    this.setStoreValue("isReqTaxonIdsAlphaNumeric", value);
     if (this.isReqTaxonIdsAlphaNumeric) {
-      store?.set("req_taxon_ids_str", this.req_taxon_ids_str);
+      this.setStoreValue("req_taxon_ids_str", this.req_taxon_ids_str);
     } else {
-      store?.set("req_taxon_ids", this.req_taxon_ids);
+      this.setStoreValue("req_taxon_ids", this.req_taxon_ids);
     }
   }
 
@@ -249,8 +222,8 @@ export class MainPage {
     if (!this.isDateManual) {
       this.manualDate = this.date;
     }
-    store?.set("isDateManual", isManual);
-    store?.set("manualDate", this.manualDate);
+    this.setStoreValue("isDateManual", isManual);
+    this.setStoreValue("manualDate", this.manualDate);
   }
 
   isLatManualChange(e: Event) {
@@ -260,8 +233,8 @@ export class MainPage {
     if (!this.isLatManual) {
       this.manualLat = this.currentLat;
     }
-    store?.set("isLatManual", isManual);
-    store?.set("manualLat", this.manualLat);
+    this.setStoreValue("isLatManual", isManual);
+    this.setStoreValue("manualLat", this.manualLat);
   }
 
   isLonManualChange(e: Event) {
@@ -271,43 +244,47 @@ export class MainPage {
     if (!this.isLonManual) {
       this.manualLon = this.currentLon;
     }
-    store?.set("isLonManual", isManual);
-    store?.set("manualLon", this.manualLon);
+    this.setStoreValue("isLonManual", isManual);
+    this.setStoreValue("manualLon", this.manualLon);
   }
 
   onManualDateChange(e: Event) {
     console.log("onManualDateChange");
     console.log(e);
     const value = (e as CustomEvent).detail.value;
-    store?.set("manualDate", value);
+    this.setStoreValue("manualDate", value);
   }
 
   onManualLatChange(e: Event) {
     console.log("onManualLatChange");
     console.log(e);
     const value = (e as CustomEvent).detail.value;
-    store?.set("manualLat", value);
+    this.setStoreValue("manualLat", value);
   }
 
   onManualLonChange(e: Event) {
     console.log("onManualLonChange");
     console.log(e);
     const value = (e as CustomEvent).detail.value;
-    store?.set("manualLon", value);
+    this.setStoreValue("manualLon", value);
   }
 
   updateCoords() {
-    Geolocation.getCurrentPosition().then((coords) => {
+    Geolocation.getCurrentPosition({
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 0
+    }).then((coords) => {
       console.log('Current position: ' + coords.coords.latitude + ", " + coords.coords.longitude);
       this.currentLat = coords.coords.latitude;
       this.currentLon = coords.coords.longitude;
       if (!this.isLatManual) {
         this.manualLat = coords.coords.latitude;
-        store?.set("manualLat", this.manualLat);
+        this.setStoreValue("manualLat", this.manualLat);
       }
       if (!this.isLonManual) {
         this.manualLon = coords.coords.longitude;
-        store?.set("manualLon", this.manualLon);
+        this.setStoreValue("manualLon", this.manualLon);
       }
     })
   }
@@ -316,7 +293,7 @@ export class MainPage {
     console.log("selectedAttributesChange", e);
     const selectedAttributes = (e as CustomEvent).detail.value;
     this.selectedAttributes = selectedAttributes;
-    store?.set("selectedAttributes", this.selectedAttributes);
+    this.setStoreValue("selectedAttributes", this.selectedAttributes);
   }
 
   isAttributeSelected(name: string) {
@@ -334,13 +311,13 @@ export class MainPage {
   selectAttribute(name: string) {
     console.log("selectAttribute: " + name);
     this.selectedAttributes.push(name);
-    store?.set("selectedAttributes", this.selectedAttributes);
+    this.setStoreValue("selectedAttributes", this.selectedAttributes);
   }
 
   removeAttribute(name: string) {
     console.log("removeAttribute: " + name);
     this.selectedAttributes = this.selectedAttributes.filter(a => a !== name);
-    store?.set("selectedAttributes", this.selectedAttributes);
+    this.setStoreValue("selectedAttributes", this.selectedAttributes);
   }
 
   configureApisClicked() {
@@ -352,7 +329,7 @@ export class MainPage {
     console.log("addCustomApi: " + this.newCustomApi.name + " - " + this.newCustomApi.url);
     if (this.newCustomApi.name !== "" && this.newCustomApi.url !== "") {
       this.customApis.push(this.newCustomApi);
-      store?.set("customApis", this.customApis);
+      this.setStoreValue("customApis", this.customApis);
     }
     this.newCustomApi = { name: "", url: "" };
   }
@@ -363,23 +340,23 @@ export class MainPage {
       this.setInfoFloraApi();
     }
     this.customApis = this.customApis.filter(a => a.name !== api.name);
-    store?.set("customApis", this.customApis);
+    this.setStoreValue("customApis", this.customApis);
   }
 
   selectApi(api: ApiStruct) {
     console.log("selectApi: ", api);
     this.selectedApi = api;
-    store?.set("selectedApi", this.selectedApi);
+    this.setStoreValue("selectedApi", this.selectedApi);
   }
 
   setInfoFloraApi() {
     this.selectedApi = { name: "Plants - Info Flora", url: this.urlInfoflora };
-    store?.set("selectedApi", this.selectedApi);
+    this.setStoreValue("selectedApi", this.selectedApi);
   }
 
   setWslApi() {
     this.selectedApi = { name: "Plants - WSL", url: this.urlWsl };
-    store?.set("selectedApi", this.selectedApi);
+    this.setStoreValue("selectedApi", this.selectedApi);
   }
 
 }
