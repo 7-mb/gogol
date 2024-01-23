@@ -64,7 +64,7 @@ export class MainPage {
   public isReqTaxonIdsAlphaNumeric: boolean = false;
   public urlInfoflora: string = "https://florid.infoflora.ch/api/v1/public/identify/images";
   public urlWsl: string = "https://speciesid.wsl.ch/florid";
-  public selectedApi: ApiStruct = { name: "Plants - Info Flora", url: this.urlInfoflora };
+  public selectedApi: ApiStruct = { name: "Plants - WSL", url: this.urlWsl };
   public customApis: ApiStruct[] = [];
   public newCustomApi: ApiStruct = { name: "", url: "" };
   public apiModalOpen: boolean = false;

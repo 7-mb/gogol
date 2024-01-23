@@ -1,7 +1,7 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'io.ionic.starter',
+  appId: 'go.gogol.horse',
   appName: 'SpeciesID',
   webDir: 'www',
   server: {
