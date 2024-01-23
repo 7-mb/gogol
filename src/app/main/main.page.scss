@@ -10,3 +10,11 @@ image-cropper {
 .check-attribute {
   margin-right: 0.7em;
 }
+
+ion-grid {
+  overflow-wrap: break-word;
+
+  &.small-font {
+    font-size: 0.5em;
+  }
+}

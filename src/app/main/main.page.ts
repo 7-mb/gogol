@@ -8,6 +8,8 @@ import { Storage } from '@ionic/storage';
 import { ImageCropperModule } from 'ngx-image-cropper';
 import { LoadingController } from '@ionic/angular';
 import { Capacitor } from '@capacitor/core';
+import { ResponseWsl } from '../ApiResponseWsl';
+import { ResponseInfoFlora } from '../ApiResponseInfoFlora';
 
 const store = new Storage();
 store.create();
@@ -21,6 +23,10 @@ enum Attribute {
   ReqTaxonId = "Req. Taxon ID"
 }
 
+enum ResponseFormat {
+  InfoFlora, WSL, Raw, None
+}
+
 @Component({
   selector: 'app-main',
   templateUrl: 'main.page.html',
@@ -30,6 +36,7 @@ enum Attribute {
 })
 export class MainPage {
   Attribute = Attribute;
+  ResponseFormat = ResponseFormat;
 
   public date: string = "";
   public manualDate: string = "";
@@ -44,7 +51,11 @@ export class MainPage {
   public isLatManual: boolean = false;
   public isLonManual: boolean = false;
 
-  public response: string = "";
+  public responseRaw: string = "";
+  public responseInfoFlora: ResponseInfoFlora | null = null;
+  public responseWsl: ResponseWsl | null = null;
+  public currentResponseFormat: ResponseFormat = ResponseFormat.None;
+
   public allAttributes: string[] = [];
   public selectedAttributes: string[] = [];
   public num_taxon_id: number = 5;
@@ -72,6 +83,7 @@ export class MainPage {
     this.setDate();
     this.initStoreValues();
     setInterval(() => this.updateCoords(), 3000);
+    this.setResponse();
   }
 
   initStoreValues() {
@@ -142,11 +154,22 @@ export class MainPage {
     })
       .then(response => response.json())
       .then(data => {
-        this.response = JSON.stringify(data, undefined, 2);
+        if (data && data.data && Array.isArray(data.data)) {
+          this.responseInfoFlora = data as ResponseInfoFlora;
+          this.currentResponseFormat = ResponseFormat.InfoFlora;
+          console.log(this.responseInfoFlora);
+        } else if (data && data.top_n && data.top_n.by_image) {
+          this.responseWsl = data as ResponseWsl;
+          this.currentResponseFormat = ResponseFormat.WSL;
+          console.log(this.responseWsl);
+        } else {
+          this.currentResponseFormat = ResponseFormat.Raw;
+        }
+        this.responseRaw = JSON.stringify(data, undefined, 2);
         this.loadingCtrl.dismiss();
       })
       .catch(error => {
-        this.response = JSON.stringify(error, undefined, 2);
+        this.responseRaw = JSON.stringify(error, undefined, 2);
         this.loadingCtrl.dismiss();
         console.error('There was an error!', error);
         alert('There was an error: HTTP ' + error.status + ' ' + error.statusText + '. Check response output.');
@@ -159,7 +182,10 @@ export class MainPage {
     this.photoService.base64Photos.length = 0;
     this.photoService.croppingImage = null;
     this.photoService.lastCropEvent = null;
-    this.response = "";
+    this.responseRaw = '';
+    this.responseInfoFlora = null;
+    this.responseWsl = null;
+    this.currentResponseFormat = ResponseFormat.None;
   }
 
   numTaxonIdChange(e: Event) {
@@ -357,6 +383,19 @@ export class MainPage {
   setWslApi() {
     this.selectedApi = { name: "Plants - WSL", url: this.urlWsl };
     this.setStoreValue("selectedApi", this.selectedApi);
+  }
+
+  setResponse() {
+    /*this.responseRaw = "{\r\n  \"success\": true,\r\n  \"data\": [\r\n    {\r\n      \"taxon_id\": 1006490,\r\n      \"probability\": 0.95,\r\n      \"coverage\": 3\r\n    },\r\n    {\r\n      \"taxon_id\": 1026710,\r\n      \"probability\": 0.89,\r\n      \"coverage\": 3\r\n    },\r\n    {\r\n      \"taxon_id\": 1003730,\r\n      \"probability\": 0.77,\r\n      \"coverage\": 3\r\n    },\r\n    {\r\n      \"taxon_id\": 1005650,\r\n      \"probability\": 0.58,\r\n      \"coverage\": 3\r\n    },\r\n    {\r\n      \"taxon_id\": 1021450,\r\n      \"probability\": 0.49,\r\n      \"coverage\": 3\r\n    },\r\n    {\r\n      \"taxon_id\": 1046220,\r\n      \"probability\": 0.09,\r\n      \"coverage\": 3\r\n    }\r\n  ]\r\n}";
+    this.responseInfoFlora = JSON.parse(this.responseRaw) as ResponseInfoFlora;
+    this.currentResponseFormat = ResponseFormat.InfoFlora;
+   */
+
+    /*this.responseRaw = " {\r\n  \"top_n\": {\r\n    \"by_image\": {\r\n      \"id\": [\r\n        \"1008080\",\r\n        \"1003730\",\r\n        \"1026710\",\r\n        \"1005650\",\r\n        \"1005640\"\r\n      ],\r\n      \"name\": [\r\n        \"Callistephus chinensis (L.) Nees\",\r\n        \"Anemone blanda Schott & Kotschy\",\r\n        \"Leucanthemum vulgare aggr.\",\r\n        \"Aster amellus L.\",\r\n        \"Aster alpinus L.\"\r\n      ],\r\n      \"image_model\": [\r\n        3.37,\r\n        0.69,\r\n        0.65,\r\n        0.4,\r\n        0.36\r\n      ],\r\n      \"ecological_model\": [\r\n        null,\r\n        0,\r\n        0.02,\r\n        0,\r\n        0\r\n      ],\r\n      \"relative_eco_score\": [\r\n        null,\r\n        31,\r\n        10,\r\n        28,\r\n        54\r\n      ],\r\n      \"combined_model\": [\r\n        null,\r\n        0.78,\r\n        1.07,\r\n        0.24,\r\n        0.32\r\n      ],\r\n      \"coverage\": [\r\n        2,\r\n        3,\r\n        3,\r\n        3,\r\n        3\r\n      ]\r\n    },\r\n    \"by_ecology\": {\r\n      \"id\": [\r\n        \"1036590\",\r\n        \"1007600\",\r\n        \"1039325\",\r\n        \"1038390\",\r\n        \"1017380\"\r\n      ],\r\n      \"name\": [\r\n        \"Prunus laurocerasus L.\",\r\n        \"Buddleja davidii Franch.\",\r\n        \"Rubus fruticosus aggr.\",\r\n        \"Rhus typhina L.\",\r\n        \"Eranthis hyemalis (L.) Salisb.\"\r\n      ],\r\n      \"image_model\": [\r\n        0.03,\r\n        0.04,\r\n        0.07,\r\n        0.04,\r\n        0.04\r\n      ],\r\n      \"ecological_model\": [\r\n        22.12,\r\n        11.77,\r\n        2.78,\r\n        2.77,\r\n        2\r\n      ],\r\n      \"relative_eco_score\": [\r\n        1,\r\n        1,\r\n        1,\r\n        1,\r\n        1\r\n      ],\r\n      \"combined_model\": [\r\n        0.42,\r\n        0.35,\r\n        0.57,\r\n        0.23,\r\n        0.28\r\n      ],\r\n      \"coverage\": [\r\n        3,\r\n        3,\r\n        3,\r\n        3,\r\n        3\r\n      ]\r\n    },\r\n    \"by_combined\": {\r\n      \"id\": [\r\n        \"1006490\",\r\n        \"1046570\",\r\n        \"1026710\",\r\n        \"1003730\",\r\n        \"1039325\"\r\n      ],\r\n      \"name\": [\r\n        \"Bellis perennis L.\",\r\n        \"Thlaspi arvense L.\",\r\n        \"Leucanthemum vulgare aggr.\",\r\n        \"Anemone blanda Schott & Kotschy\",\r\n        \"Rubus fruticosus aggr.\"\r\n      ],\r\n      \"image_model\": [\r\n        0.31,\r\n        0.19,\r\n        0.65,\r\n        0.69,\r\n        0.07\r\n      ],\r\n      \"ecological_model\": [\r\n        1.14,\r\n        0.02,\r\n        0.02,\r\n        0,\r\n        2.78\r\n      ],\r\n      \"relative_eco_score\": [\r\n        1,\r\n        11,\r\n        10,\r\n        31,\r\n        1\r\n      ],\r\n      \"combined_model\": [\r\n        2.18,\r\n        1.16,\r\n        1.07,\r\n        0.78,\r\n        0.57\r\n      ],\r\n      \"coverage\": [\r\n        3,\r\n        3,\r\n        3,\r\n        3,\r\n        3\r\n      ]\r\n    }\r\n  },\r\n  \"requested_taxa\": {\r\n    \"id\": [\r\n      \"1046220\"\r\n    ],\r\n    \"name\": [\r\n      \"Tephroseris helenitis (L.) B. Nord.\"\r\n    ],\r\n    \"image_model\": [\r\n      0.03\r\n    ],\r\n    \"ecological_model\": [\r\n      0\r\n    ],\r\n    \"relative_eco_score\": [\r\n      100\r\n    ],\r\n    \"combined_model\": [\r\n      0\r\n    ],\r\n    \"coverage\": [\r\n      3\r\n    ]\r\n  },\r\n  \"Warnings\": []\r\n}";
+    this.responseRaw = " {\r\n  \"top_n\": {\r\n    \"by_image\": {\r\n      \"id\": [\r\n        \"1008080\",\r\n        \"1003730\",\r\n        \"1026710\",\r\n        \"1005650\",\r\n        \"1005640\"\r\n      ],\r\n      \"name\": [\r\n        \"Callistephus chinensis (L.) Nees\",\r\n        \"Anemone blanda Schott & Kotschy\",\r\n        \"Leucanthemum vulgare aggr.\",\r\n        \"Aster amellus L.\",\r\n        \"Aster alpinus L.\"\r\n      ],\r\n      \"image_model\": [\r\n        3.37,\r\n        0.69,\r\n        0.65,\r\n        0.4,\r\n        0.36\r\n      ],\r\n      \"ecological_model\": [\r\n        null,\r\n        0,\r\n        0.02,\r\n        0,\r\n        0\r\n      ],\r\n      \"relative_eco_score\": [\r\n        null,\r\n        31,\r\n        10,\r\n        28,\r\n        54\r\n      ],\r\n      \"combined_model\": [\r\n        null,\r\n        0.78,\r\n        1.07,\r\n        0.24,\r\n        0.32\r\n      ],\r\n      \"coverage\": [\r\n        2,\r\n        3,\r\n        3,\r\n        3,\r\n        3\r\n      ]\r\n    },\r\n    \"by_ecology\": {\r\n      \"id\": [\r\n        \"1036590\",\r\n        \"1007600\",\r\n        \"1039325\",\r\n        \"1038390\",\r\n        \"1017380\"\r\n      ],\r\n      \"name\": [\r\n        \"Prunus laurocerasus L.\",\r\n        \"Buddleja davidii Franch.\",\r\n        \"Rubus fruticosus aggr.\",\r\n        \"Rhus typhina L.\",\r\n        \"Eranthis hyemalis (L.) Salisb.\"\r\n      ],\r\n      \"image_model\": [\r\n        0.03,\r\n        0.04,\r\n        0.07,\r\n        0.04,\r\n        0.04\r\n      ],\r\n      \"ecological_model\": [\r\n        22.12,\r\n        11.77,\r\n        2.78,\r\n        2.77,\r\n        2\r\n      ],\r\n      \"relative_eco_score\": [\r\n        1,\r\n        1,\r\n        1,\r\n        1,\r\n        1\r\n      ],\r\n      \"combined_model\": [\r\n        0.42,\r\n        0.35,\r\n        0.57,\r\n        0.23,\r\n        0.28\r\n      ],\r\n      \"coverage\": [\r\n        3,\r\n        3,\r\n        3,\r\n        3,\r\n        3\r\n      ]\r\n    },\r\n    \"by_combined\": {\r\n      \"id\": [\r\n        \"1006490\",\r\n        \"1046570\",\r\n        \"1026710\",\r\n        \"1003730\",\r\n        \"1039325\"\r\n      ],\r\n      \"name\": [\r\n        \"Bellis perennis L.\",\r\n        \"Thlaspi arvense L.\",\r\n        \"Leucanthemum vulgare aggr.\",\r\n        \"Anemone blanda Schott & Kotschy\",\r\n        \"Rubus fruticosus aggr.\"\r\n      ],\r\n      \"image_model\": [\r\n        0.31,\r\n        0.19,\r\n        0.65,\r\n        0.69,\r\n        0.07\r\n      ],\r\n      \"ecological_model\": [\r\n        1.14,\r\n        0.02,\r\n        0.02,\r\n        0,\r\n        2.78\r\n      ],\r\n      \"relative_eco_score\": [\r\n        1,\r\n        11,\r\n        10,\r\n        31,\r\n        1\r\n      ],\r\n      \"combined_model\": [\r\n        2.18,\r\n        1.16,\r\n        1.07,\r\n        0.78,\r\n        0.57\r\n      ],\r\n      \"coverage\": [\r\n        3,\r\n        3,\r\n        3,\r\n        3,\r\n        3\r\n      ]\r\n    }\r\n  },\r\n  \"requested_taxa\": {\r\n    \"id\": [\r\n      \"1046220\"\r\n    ],\r\n    \"name\": [\r\n      \"Tephroseris helenitis (L.) B. Nord.\"\r\n    ],\r\n    \"image_model\": [\r\n      0.03\r\n    ],\r\n    \"ecological_model\": [\r\n      0\r\n    ],\r\n    \"relative_eco_score\": [\r\n      100\r\n    ],\r\n    \"combined_model\": [\r\n      0\r\n    ],\r\n    \"coverage\": [\r\n      3\r\n    ]\r\n  },\r\n  \"Warnings\": [\"asdf\",\"asdf\"]\r\n}";
+    
+    this.responseWsl = JSON.parse(this.responseRaw) as ResponseWsl;
+    this.currentResponseFormat = ResponseFormat.WSL;*/
   }
 
 }

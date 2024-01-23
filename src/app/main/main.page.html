@@ -1,15 +1,186 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>
-      SpeciesID
+      SpeciesID {{currentResponseFormat}}
     </ion-title>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
   <ion-list>
-    <ion-item *ngIf="response != ''">
-      <pre>Response: {{response}}</pre>
+
+
+    <ion-accordion-group *ngIf="currentResponseFormat === ResponseFormat.InfoFlora && responseInfoFlora !== null">
+
+      <ion-accordion value="top_n">
+        <ion-item slot="header" color="success">
+          <ion-label>
+            <h3>Top {{responseInfoFlora.data.length}} probabilities</h3>
+          </ion-label>
+        </ion-item>
+
+        <ion-grid slot="content"
+          *ngIf="currentResponseFormat === ResponseFormat.InfoFlora && responseInfoFlora !== null">
+          <ion-row>
+            <ion-col><b>Taxon ID</b></ion-col>
+            <ion-col><b>Probability</b></ion-col>
+            <ion-col><b>Coverage</b></ion-col>
+          </ion-row>
+          <ion-row *ngFor="let row of responseInfoFlora.data; index as position">
+            <ion-col>
+              {{row.taxon_id}}
+            </ion-col>
+            <ion-col>
+              {{row.probability}}
+            </ion-col>
+            <ion-col>
+              {{row.coverage}}
+            </ion-col>
+          </ion-row>
+        </ion-grid>
+
+      </ion-accordion>
+
+    </ion-accordion-group>
+
+
+
+
+    <ion-accordion-group [multiple]="true" *ngIf="currentResponseFormat === ResponseFormat.WSL && responseWsl !== null">
+
+      <ion-accordion value="by_image">
+        <ion-item slot="header" color="success">
+          <ion-label>
+            <h3>Top {{responseWsl.top_n.by_image.id.length}} by image-based probabilities</h3>
+          </ion-label>
+        </ion-item>
+        <ion-grid slot="content" class="small-font"
+          *ngIf="currentResponseFormat === ResponseFormat.WSL && responseWsl !== null && responseWsl.top_n !== null && responseWsl.top_n.by_image !== null">
+          <ion-row>
+            <ion-col size="1.8"><b>Tax. ID</b></ion-col>
+            <ion-col size="3.7"><b>Taxon name</b></ion-col>
+            <ion-col size="1.3"><b>Img. %</b></ion-col>
+            <ion-col size="1.3"><b>Eco. %</b></ion-col>
+            <ion-col size="1.3"><b>Comb. %</b></ion-col>
+            <ion-col size="1.3"><b>Eco rel.</b></ion-col>
+            <ion-col size="1.3"><b>Covg.</b></ion-col>
+          </ion-row>
+          <ion-row *ngFor="let row of responseWsl.top_n.by_image.id; index as i">
+            <ion-col size="1.8">{{row}}</ion-col>
+            <ion-col size="3.7">{{responseWsl.top_n.by_image.name[i]}}</ion-col>
+            <ion-col size="1.3">{{responseWsl.top_n.by_image.image_model[i]}}</ion-col>
+            <ion-col size="1.3">{{responseWsl.top_n.by_image.ecological_model[i]}}</ion-col>
+            <ion-col size="1.3">{{responseWsl.top_n.by_image.combined_model[i]}}</ion-col>
+            <ion-col size="1.3">{{responseWsl.top_n.by_image.relative_eco_score[i]}}</ion-col>
+            <ion-col size="1.3">{{responseWsl.top_n.by_image.coverage[i]}}</ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-accordion>
+
+      <ion-accordion value="by_ecology">
+        <ion-item slot="header" color="success">
+          <ion-label>
+            <h3>Top {{responseWsl.top_n.by_ecology.id.length}} by ecological probabilities</h3>
+          </ion-label>
+        </ion-item>
+        <ion-grid slot="content" class="small-font"
+          *ngIf="currentResponseFormat === ResponseFormat.WSL && responseWsl !== null && responseWsl.top_n !== null && responseWsl.top_n.by_ecology !== null">
+          <ion-row>
+            <ion-col size="1.8"><b>Tax. ID</b></ion-col>
+            <ion-col size="3.7"><b>Taxon name</b></ion-col>
+            <ion-col size="1.3"><b>Img. %</b></ion-col>
+            <ion-col size="1.3"><b>Eco. %</b></ion-col>
+            <ion-col size="1.3"><b>Comb. %</b></ion-col>
+            <ion-col size="1.3"><b>Eco rel.</b></ion-col>
+            <ion-col size="1.3"><b>Covg.</b></ion-col>
+          </ion-row>
+          <ion-row *ngFor="let row of responseWsl.top_n.by_ecology.id; index as i">
+            <ion-col size="1.8">{{row}}</ion-col>
+            <ion-col size="3.7">{{responseWsl.top_n.by_ecology.name[i]}}</ion-col>
+            <ion-col size="1.3">{{responseWsl.top_n.by_ecology.image_model[i]}}</ion-col>
+            <ion-col size="1.3">{{responseWsl.top_n.by_ecology.ecological_model[i]}}</ion-col>
+            <ion-col size="1.3">{{responseWsl.top_n.by_ecology.combined_model[i]}}</ion-col>
+            <ion-col size="1.3">{{responseWsl.top_n.by_ecology.relative_eco_score[i]}}</ion-col>
+            <ion-col size="1.3">{{responseWsl.top_n.by_ecology.coverage[i]}}</ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-accordion>
+
+      <ion-accordion value="by_combined">
+        <ion-item slot="header" color="success">
+          <ion-label>
+            <h3>Top {{responseWsl.top_n.by_combined.id.length}} by combined probabilities</h3>
+          </ion-label>
+        </ion-item>
+        <ion-grid slot="content" class="small-font"
+          *ngIf="currentResponseFormat === ResponseFormat.WSL && responseWsl !== null && responseWsl.top_n !== null && responseWsl.top_n.by_combined !== null">
+          <ion-row>
+            <ion-col size="1.8"><b>Tax. ID</b></ion-col>
+            <ion-col size="3.7"><b>Taxon name</b></ion-col>
+            <ion-col size="1.3"><b>Img. %</b></ion-col>
+            <ion-col size="1.3"><b>Eco. %</b></ion-col>
+            <ion-col size="1.3"><b>Comb. %</b></ion-col>
+            <ion-col size="1.3"><b>Eco rel.</b></ion-col>
+            <ion-col size="1.3"><b>Covg.</b></ion-col>
+          </ion-row>
+          <ion-row *ngFor="let row of responseWsl.top_n.by_combined.id; index as i">
+            <ion-col size="1.8">{{row}}</ion-col>
+            <ion-col size="3.7">{{responseWsl.top_n.by_combined.name[i]}}</ion-col>
+            <ion-col size="1.3">{{responseWsl.top_n.by_combined.image_model[i]}}</ion-col>
+            <ion-col size="1.3">{{responseWsl.top_n.by_combined.ecological_model[i]}}</ion-col>
+            <ion-col size="1.3">{{responseWsl.top_n.by_combined.combined_model[i]}}</ion-col>
+            <ion-col size="1.3">{{responseWsl.top_n.by_combined.relative_eco_score[i]}}</ion-col>
+            <ion-col size="1.3">{{responseWsl.top_n.by_combined.coverage[i]}}</ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-accordion>
+
+      <ion-accordion value="requested_taxa">
+        <ion-item slot="header" color="success">
+          <ion-label>
+            <h3>Requested taxa</h3>
+          </ion-label>
+        </ion-item>
+        <ion-grid slot="content" class="small-font"
+          *ngIf="currentResponseFormat === ResponseFormat.WSL && responseWsl !== null && responseWsl.top_n !== null">
+          <ion-row>
+            <ion-col size="1.8"><b>Tax. ID</b></ion-col>
+            <ion-col size="3.7"><b>Taxon name</b></ion-col>
+            <ion-col size="1.3"><b>Img. %</b></ion-col>
+            <ion-col size="1.3"><b>Eco. %</b></ion-col>
+            <ion-col size="1.3"><b>Comb. %</b></ion-col>
+            <ion-col size="1.3"><b>Eco rel.</b></ion-col>
+            <ion-col size="1.3"><b>Covg.</b></ion-col>
+          </ion-row>
+          <ion-row>
+            <ion-col size="1.8">{{responseWsl.requested_taxa.id}}</ion-col>
+            <ion-col size="3.7">{{responseWsl.requested_taxa.name}}</ion-col>
+            <ion-col size="1.3">{{responseWsl.requested_taxa.image_model}}</ion-col>
+            <ion-col size="1.3">{{responseWsl.requested_taxa.ecological_model}}</ion-col>
+            <ion-col size="1.3">{{responseWsl.requested_taxa.combined_model}}</ion-col>
+            <ion-col size="1.3">{{responseWsl.requested_taxa.relative_eco_score}}</ion-col>
+            <ion-col size="1.3">{{responseWsl.requested_taxa.coverage}}</ion-col>
+          </ion-row>
+        </ion-grid>
+      </ion-accordion>
+
+      <ion-accordion value="warnings" *ngIf="responseWsl.Warnings && responseWsl.Warnings.length > 0">
+        <ion-item slot="header" color="warning">
+          <ion-label>
+            <h3>Warnings</h3>
+          </ion-label>
+        </ion-item>
+        <div slot="content" class="ion-padding">
+          <ion-label *ngFor="let row of responseWsl.Warnings; index as i">
+            <h3>{{row}}</h3>
+          </ion-label>
+        </div>
+      </ion-accordion>
+
+    </ion-accordion-group>
+
+    <ion-item *ngIf="currentResponseFormat === ResponseFormat.Raw && responseRaw != ''">
+      <pre>Response: {{responseRaw}}</pre>
     </ion-item>
     <ion-item
       *ngIf="selectedAttributes.includes(Attribute.Lat) || selectedAttributes.includes(Attribute.Lon) || selectedAttributes.includes(Attribute.Date)">
