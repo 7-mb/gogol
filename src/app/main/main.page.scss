@@ -11,10 +11,27 @@ image-cropper {
   margin-right: 0.7em;
 }
 
+ion-grid::part(table-header) {
+  color: blue !important;
+}
+
+ion-grid::asdf(table-header) {
+  color: blue !important;
+}
+
 ion-grid {
   overflow-wrap: break-word;
 
-  &.small-font {
+  .table-header {
+    font-size: 0.7em;
+  }
+
+  &.table-cell {
+    font-size: 0.7em;
+  }
+
+  &.table-cell {
     font-size: 0.5em;
   }
+
 }
