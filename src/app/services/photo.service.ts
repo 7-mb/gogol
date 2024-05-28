@@ -17,7 +17,6 @@ export class PhotoService {
   transform: ImageTransform = {};
   isMobile = Capacitor.getPlatform() !== 'web';
   isCropping: boolean = false;
-  asdfasdf = "asdfasdf";
   imgLat: number = 0;
   imgLon: number = 0;
 
@@ -96,8 +95,6 @@ export class PhotoService {
         console.log("### No image coords found");
       }
     }
-
-    this.asdfasdf = JSON.stringify(capturedPhoto, undefined, 2);
   }
 
   private hasImageIosCoords(img: Photo): boolean {

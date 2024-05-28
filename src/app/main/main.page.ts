@@ -43,10 +43,10 @@ export class MainPage {
   public isLonManual: boolean = false;
   public useLatLonFromImg: boolean = false;
 
-  public responseRaw: string = "asdf";
+  public responseRaw: string = "";
   public responseInfoFlora: ResponseInfoFlora | null = null;
   public responseWsl: ResponseWsl | null = null;
-  public currentResponseFormat: ResponseFormat = ResponseFormat.Raw;
+  public currentResponseFormat: ResponseFormat = ResponseFormat.None;
 
   public allAttributes: string[] = [];
   public selectedAttributes: string[] = [];

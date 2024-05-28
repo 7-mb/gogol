@@ -64,8 +64,8 @@
       </ion-accordion>
     </ion-accordion-group>
 
-    <ion-item *ngIf="currentResponseFormat === ResponseFormat.Raw && photoService.asdfasdf != ''">
-      <pre>Response: {{photoService.asdfasdf}}</pre>
+    <ion-item *ngIf="currentResponseFormat === ResponseFormat.Raw && responseRaw != ''">
+      <pre>Response: {{responseRaw}}</pre>
     </ion-item>
     <ion-item
       *ngIf="selectedAttributes.includes(Attribute.Lat) || selectedAttributes.includes(Attribute.Lon) || selectedAttributes.includes(Attribute.Date)">
