@@ -17,6 +17,7 @@ export class PhotoService {
   transform: ImageTransform = {};
   isMobile = Capacitor.getPlatform() !== 'web';
   isCropping: boolean = false;
+  asdfasdf = "asdfasdf";
 
   capturedImage: Photo | null = null;
 
@@ -62,6 +63,8 @@ export class PhotoService {
 
     this.croppingImage = await this.readAsBase64(capturedPhoto);
     this.capturedImage = capturedPhoto;
+    this.asdfasdf = JSON.stringify(capturedPhoto, undefined, 2);
+    
   }
 
   // Called when cropper is ready
