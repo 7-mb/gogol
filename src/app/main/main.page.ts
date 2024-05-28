@@ -122,9 +122,9 @@ export class MainPage {
     }
     const body: any = {};
     if (this.selectedAttributes.includes(Attribute.Images)) body.images = this.photoService.base64Photos;
-    if (this.selectedAttributes.includes(Attribute.Lat)) body.lat = this.useLatLonFromImg && this.photoService.imgLat > 0 ?
+    if (this.selectedAttributes.includes(Attribute.Lat)) body.lat = this.useCoordsFromImg() ?
       this.photoService.imgLat : this.isLatManual ? this.manualLat : this.currentLat;
-    if (this.selectedAttributes.includes(Attribute.Lon)) body.lon = this.useLatLonFromImg && this.photoService.imgLon > 0 ?
+    if (this.selectedAttributes.includes(Attribute.Lon)) body.lon = this.useCoordsFromImg() ?
       this.photoService.imgLon : this.isLonManual ? this.manualLon : this.currentLon;
     if (this.selectedAttributes.includes(Attribute.Date)) body.date = this.isDateManual ? this.manualDate : this.date;
     if (this.selectedAttributes.includes(Attribute.NumTaxonId)) body.num_taxon_ids = this.num_taxon_id;
@@ -180,6 +180,7 @@ export class MainPage {
     this.photoService.lastCropEvent = null;
     this.photoService.imgLat = 0;
     this.photoService.imgLon = 0;
+    this.photoService.imgWithCoordsIdx = 0;
     this.responseRaw = '';
     this.responseInfoFlora = null;
     this.responseWsl = null;
@@ -242,14 +243,14 @@ export class MainPage {
   showResponseAsTableChange(e: Event) {
     console.log("showResponseAsTableChange");
     console.log(e);
-    const value = (e as CustomEvent).detail.value;
+    const value = (e as CustomEvent).detail.checked;
     this.setStoreValue("showResponseAsTable", value);
   }
 
   useLatLonFromImgChange(e: Event) {
     console.log("useLatLonFromImgChange");
     console.log(e);
-    const value = (e as CustomEvent).detail.value;
+    const value = (e as CustomEvent).detail.checked;
     this.setStoreValue("useLatLonFromImg", value);
   }
 
@@ -268,7 +269,7 @@ export class MainPage {
     console.log("isLatManualChange");
     console.log(e);
     const isManual = (e as CustomEvent).detail.checked;
-    if (!this.isLatManual) { 
+    if (!this.isLatManual) {
       this.manualLat = this.currentLat;
     }
     this.setStoreValue("isLatManual", isManual);
@@ -408,6 +409,10 @@ export class MainPage {
 
     //this.responseWsl = JSON.parse(this.responseRaw) as ResponseWsl;
     //this.currentResponseFormat = ResponseFormat.WSL;
+  }
+
+  private useCoordsFromImg(): boolean {
+    return this.useLatLonFromImg && this.photoService.imgLat > 0 && this.photoService.imgLon > 0;
   }
 
 }

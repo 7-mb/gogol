@@ -11,4 +11,12 @@ image-cropper {
   margin-right: 0.7em;
 }
 
+ion-img {
+  position: relative;
+}
 
+.image-label {
+  position: absolute;
+  bottom: 0.5em;
+  left: 0.5em;
+}
