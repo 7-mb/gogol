@@ -27,6 +27,8 @@ export class MainPage {
   Attribute = Attribute;
   ResponseFormat = ResponseFormat;
 
+  public showResponseAsTable: boolean = true;
+
   public date: string = "";
   public manualDate: string = "";
 
@@ -39,6 +41,7 @@ export class MainPage {
   public isDateManual: boolean = false;
   public isLatManual: boolean = false;
   public isLonManual: boolean = false;
+  public useLatLonFromImg: boolean = false;
 
   public responseRaw: string = "asdf";
   public responseInfoFlora: ResponseInfoFlora | null = null;
@@ -77,6 +80,7 @@ export class MainPage {
 
   initStoreValues() {
     const storeValueNames: (keyof MainPage)[] = [
+      'showResponseAsTable',
       'selectedApi',
       'customApis',
       'selectedAttributes',
@@ -87,6 +91,7 @@ export class MainPage {
       'isDateManual',
       'isLatManual',
       'isLonManual',
+      'useLatLonFromImg',
       'manualDate',
       'manualLat',
       'manualLon'
@@ -117,8 +122,10 @@ export class MainPage {
     }
     const body: any = {};
     if (this.selectedAttributes.includes(Attribute.Images)) body.images = this.photoService.base64Photos;
-    if (this.selectedAttributes.includes(Attribute.Lat)) body.lat = this.isLatManual ? this.manualLat : this.currentLat;
-    if (this.selectedAttributes.includes(Attribute.Lon)) body.lon = this.isLonManual ? this.manualLon : this.currentLon;
+    if (this.selectedAttributes.includes(Attribute.Lat)) body.lat = this.useLatLonFromImg && this.photoService.imgLat > 0 ?
+      this.photoService.imgLat : this.isLatManual ? this.manualLat : this.currentLat;
+    if (this.selectedAttributes.includes(Attribute.Lon)) body.lon = this.useLatLonFromImg && this.photoService.imgLon > 0 ?
+      this.photoService.imgLon : this.isLonManual ? this.manualLon : this.currentLon;
     if (this.selectedAttributes.includes(Attribute.Date)) body.date = this.isDateManual ? this.manualDate : this.date;
     if (this.selectedAttributes.includes(Attribute.NumTaxonId)) body.num_taxon_ids = this.num_taxon_id;
     if (this.selectedAttributes.includes(Attribute.ReqTaxonId)) body.req_taxon_ids = this.isReqTaxonIdsAlphaNumeric ? this.req_taxon_ids_str : this.req_taxon_ids;
@@ -171,6 +178,8 @@ export class MainPage {
     this.photoService.base64Photos.length = 0;
     this.photoService.croppingImage = null;
     this.photoService.lastCropEvent = null;
+    this.photoService.imgLat = 0;
+    this.photoService.imgLon = 0;
     this.responseRaw = '';
     this.responseInfoFlora = null;
     this.responseWsl = null;
@@ -230,6 +239,20 @@ export class MainPage {
     if (this.manualDate == "" || this.manualDate == null) this.manualDate = formattedDate;
   }
 
+  showResponseAsTableChange(e: Event) {
+    console.log("showResponseAsTableChange");
+    console.log(e);
+    const value = (e as CustomEvent).detail.value;
+    this.setStoreValue("showResponseAsTable", value);
+  }
+
+  useLatLonFromImgChange(e: Event) {
+    console.log("useLatLonFromImgChange");
+    console.log(e);
+    const value = (e as CustomEvent).detail.value;
+    this.setStoreValue("useLatLonFromImg", value);
+  }
+
   isDateManualChange(e: Event) {
     console.log("isDateManualChange");
     console.log(e);
@@ -245,7 +268,7 @@ export class MainPage {
     console.log("isLatManualChange");
     console.log(e);
     const isManual = (e as CustomEvent).detail.checked;
-    if (!this.isLatManual) {
+    if (!this.isLatManual) { 
       this.manualLat = this.currentLat;
     }
     this.setStoreValue("isLatManual", isManual);

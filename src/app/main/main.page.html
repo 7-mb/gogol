@@ -50,7 +50,7 @@
       <app-result-table-wsl [responseData]="responseWsl" [isRequestedTaxa]="true"
         [currentResponseFormat]="currentResponseFormat"></app-result-table-wsl>
 
-        <ion-accordion value="warnings" *ngIf="responseWsl.Warnings && responseWsl.Warnings.length > 0">
+      <ion-accordion value="warnings" *ngIf="responseWsl.Warnings && responseWsl.Warnings.length > 0">
         <ion-item slot="header" color="warning">
           <ion-label>
             <h3>Warnings</h3>
@@ -91,7 +91,8 @@
     </ion-item>
     <ion-item (click)="requestParameterModalOpen = true">
       <ion-icon aria-hidden="true" name="chevron-forward-outline" slot="end"></ion-icon>
-      <ion-label>Configure Request Parameters</ion-label>
+      <ion-label>Configure Request/Response
+      </ion-label>
     </ion-item>
   </ion-list>
   <ion-grid id="image-grid">
@@ -208,13 +209,31 @@
   <ng-template>
     <ion-header>
       <ion-toolbar>
-        <ion-title>Configure Request Parameters</ion-title>
+        <ion-title>Configure Request/Response</ion-title>
         <ion-buttons slot="end">
           <ion-button (click)="requestParameterModalOpen = false">Close</ion-button>
         </ion-buttons>
       </ion-toolbar>
     </ion-header>
     <ion-content>
+      <ion-item-divider>
+        <ion-label>
+          General
+        </ion-label>
+      </ion-item-divider>
+      <ion-item>
+        <ion-toggle [checked]="showResponseAsTable" [(ngModel)]="showResponseAsTable"
+          (ionChange)="showResponseAsTableChange($event)">Show response in table format</ion-toggle>
+      </ion-item>
+      <ion-item>
+        <ion-toggle [checked]="useLatLonFromImg" [(ngModel)]="useLatLonFromImg"
+          (ionChange)="useLatLonFromImgChange($event)">Use geolocation from images if available</ion-toggle>
+      </ion-item>
+      <ion-item-divider>
+        <ion-label>
+          Request Parameters
+        </ion-label>
+      </ion-item-divider>
       <ion-item lines="none">
         <ion-icon (click)="attributeCheckClicked(Attribute.Images)" slot="start" class="check-attribute"
           [name]="isAttributeSelected(Attribute.Images) ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
@@ -255,7 +274,6 @@
           [(ngModel)]="currentLon" type="number" [disabled]="true"></ion-input>
         <ion-input *ngIf="isLonManual" placeholder="Longitude" label="Longitude" labelPlacement="stacked"
           [(ngModel)]="manualLon" type="number" (ionChange)="onManualLonChange($event)"></ion-input>
-
       </ion-item>
       <ion-item>
         <ion-toggle slot="end" [checked]="isLonManual" [(ngModel)]="isLonManual"

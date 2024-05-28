@@ -18,6 +18,8 @@ export class PhotoService {
   isMobile = Capacitor.getPlatform() !== 'web';
   isCropping: boolean = false;
   asdfasdf = "asdfasdf";
+  imgLat: number = 0;
+  imgLon: number = 0;
 
   capturedImage: Photo | null = null;
 
@@ -63,8 +65,73 @@ export class PhotoService {
 
     this.croppingImage = await this.readAsBase64(capturedPhoto);
     this.capturedImage = capturedPhoto;
+
+    /*let img = {
+      exif: {
+        GPS: {
+          Latitude: 47.35398,
+          Longitude: 7.899116666667
+        }
+      }
+    } as Photo;*/
+
+    /*let img = {
+      exif: {
+        GPSLatitude: "47/1,21/1,15/1",
+        GPSLongitude: "7/1,53/1,56/1"
+      }
+    } as Photo;*/
+
+    if (this.imgLat == 0 || this.imgLon == 0) {
+      if (this.hasImageIosCoords(capturedPhoto)) {
+        this.imgLat = capturedPhoto?.exif?.GPS?.Latitude;
+        this.imgLon = capturedPhoto?.exif?.GPS?.Longitude;
+        console.log("### IOS coords: " + this.imgLat + ", " + this.imgLon);
+      }
+      else if (this.hasImageAndroidCoords(capturedPhoto)) {
+        this.imgLat = this.parseAndroidCoord(capturedPhoto.exif.GPSLatitude);
+        this.imgLon = this.parseAndroidCoord(capturedPhoto.exif.GPSLongitude);
+        console.log("### Android coords: " + this.imgLat + ", " + this.imgLon);
+      } else {
+        console.log("### No image coords found");
+      }
+    }
+
     this.asdfasdf = JSON.stringify(capturedPhoto, undefined, 2);
-    
+  }
+
+  private hasImageIosCoords(img: Photo): boolean {
+    return img?.exif?.GPS?.Latitude !== undefined &&
+      typeof img?.exif?.GPS?.Latitude === 'number' &&
+      !isNaN(img?.exif?.GPS?.Latitude) &&
+      img?.exif?.GPS?.Longitude !== undefined &&
+      typeof img?.exif?.GPS?.Longitude === 'number' &&
+      !isNaN(img?.exif?.GPS?.Longitude);
+  }
+
+  private hasImageAndroidCoords(img: Photo): boolean {
+    return img?.exif?.GPSLatitude !== undefined &&
+      typeof img?.exif?.GPSLatitude === 'string' &&
+      img?.exif?.GPSLatitude.includes(",") &&
+      img?.exif?.GPSLatitude.includes("/") &&
+      img?.exif?.GPSLongitude !== undefined &&
+      typeof img?.exif?.GPSLongitude === 'string' &&
+      img?.exif?.GPSLongitude.includes(",") &&
+      img?.exif?.GPSLongitude.includes("/")
+  }
+
+  private parseAndroidCoord(coord: string): number {
+    const MINUTES_DIVISOR = 60
+    const SECONDS_DIVISOR = 60 * 60
+    let degrees, minuteParts, minutes, minuteDenominator, secondParts, seconds, secondsDenominator, divisor
+    let parts = coord.split('/') as Array<string>
+    [degrees, minuteParts, secondParts, divisor] = parts
+    minuteParts = minuteParts.split(',') as Array<string>
+    [minuteDenominator, minutes] = minuteParts
+    secondParts = secondParts.split(',') as Array<string>
+    [secondsDenominator, seconds] = secondParts
+    let dd: any = parseFloat(degrees) + (parseFloat(minutes) * parseInt(minuteDenominator)) / MINUTES_DIVISOR + (parseFloat(seconds) * parseInt(secondsDenominator)) / SECONDS_DIVISOR / parseFloat(divisor)
+    return dd as number
   }
 
   // Called when cropper is ready
