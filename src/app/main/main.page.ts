@@ -180,7 +180,6 @@ export class MainPage {
     this.photoService.lastCropEvent = null;
     this.photoService.imgLat = 0;
     this.photoService.imgLon = 0;
-    this.photoService.imgWithCoordsIdx = 0;
     this.responseRaw = '';
     this.responseInfoFlora = null;
     this.responseWsl = null;
