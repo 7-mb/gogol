@@ -15,14 +15,14 @@
       <div class="col col-covg">Covg.</div>
     </header>
     <ng-container *ngIf="isRequestedTaxa && responseData != null && responseData.requested_taxa != null">
-      <div class="row">
-        <div class="col col-id">{{responseData.requested_taxa.id}}</div>
-        <div class="col col-name">{{responseData.requested_taxa.name}}</div>
-        <div class="col col-img">{{responseData.requested_taxa.image_model}}</div>
-        <div class="col col-eco">{{responseData.requested_taxa.ecological_model}}</div>
-        <div class="col col-comb">{{responseData.requested_taxa.combined_model}}</div>
-        <div class="col col-eco-rel">{{responseData.requested_taxa.relative_eco_score}}</div>
-        <div class="col col-covg">{{responseData.requested_taxa.coverage}}</div>
+      <div class="row" *ngFor="let row of responseData.requested_taxa.id; index as i">
+        <div class="col col-id">{{responseData.requested_taxa.id[i]}}</div>
+        <div class="col col-name">{{responseData.requested_taxa.name[i]}}</div>
+        <div class="col col-img">{{responseData.requested_taxa.image_model[i]}}</div>
+        <div class="col col-eco">{{responseData.requested_taxa.ecological_model[i]}}</div>
+        <div class="col col-comb">{{responseData.requested_taxa.combined_model[i]}}</div>
+        <div class="col col-eco-rel">{{responseData.requested_taxa.relative_eco_score[i]}}</div>
+        <div class="col col-covg">{{responseData.requested_taxa.coverage[i]}}</div>
       </div>
     </ng-container>
     <ng-container
