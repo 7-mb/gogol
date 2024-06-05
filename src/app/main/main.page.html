@@ -3,13 +3,18 @@
     <ion-title>
       SpeciesID
     </ion-title>
+    <ion-buttons slot="end">
+      <small id="wsl-logo-text">powered by</small>
+      <ion-img src="../../assets/logo_wsl.svg" alt="Logo" id="wsl-logo"></ion-img>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
   <ion-list>
 
-    <ion-accordion-group *ngIf="showResponseAsTable && currentResponseFormat === ResponseFormat.InfoFlora && responseInfoFlora !== null">
+    <ion-accordion-group
+      *ngIf="showResponseAsTable && currentResponseFormat === ResponseFormat.InfoFlora && responseInfoFlora !== null">
 
       <ion-accordion value="top_n">
         <ion-item slot="header" color="primary">
@@ -39,7 +44,8 @@
       </ion-accordion>
     </ion-accordion-group>
 
-    <ion-accordion-group [multiple]="true" *ngIf="showResponseAsTable && currentResponseFormat === ResponseFormat.WSL && responseWsl !== null">
+    <ion-accordion-group [multiple]="true"
+      *ngIf="showResponseAsTable && currentResponseFormat === ResponseFormat.WSL && responseWsl !== null">
 
       <app-result-table-wsl [resultType]="'by_image'" [responseData]="responseWsl"
         [currentResponseFormat]="currentResponseFormat"></app-result-table-wsl>
@@ -105,6 +111,7 @@
       </ion-col>
     </ion-row>
   </ion-grid>
+
   <ion-fab vertical="bottom" horizontal="end" slot="fixed">
     <ion-fab-button (click)="addPhotoToGallery()" [disabled]="photoService.photos.length >= 5">
       <ion-icon name="camera"></ion-icon>
@@ -230,7 +237,8 @@
       </ion-item>
       <ion-item>
         <ion-toggle [checked]="useLatLonFromImg" [(ngModel)]="useLatLonFromImg"
-          (ionChange)="useLatLonFromImgChange($event)"><small>Use geolocation from images if available</small></ion-toggle>
+          (ionChange)="useLatLonFromImgChange($event)"><small>Use geolocation from images if
+            available</small></ion-toggle>
       </ion-item>
       <ion-item-divider>
         <ion-label>
