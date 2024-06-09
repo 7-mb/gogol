@@ -126,7 +126,8 @@ export class MainPage {
       this.photoService.imgLat : this.isLatManual ? this.manualLat : this.currentLat;
     if (this.selectedAttributes.includes(Attribute.Lon)) body.lon = this.useCoordsFromImg() ?
       this.photoService.imgLon : this.isLonManual ? this.manualLon : this.currentLon;
-    if (this.selectedAttributes.includes(Attribute.Date)) body.date = this.isDateManual ? this.manualDate : this.date;
+    if (this.selectedAttributes.includes(Attribute.Date)) body.date = this.useCoordsFromImg() && this.photoService.imgDate !== "" ?
+      this.photoService.imgDate : this.isDateManual ? this.manualDate : this.date;
     if (this.selectedAttributes.includes(Attribute.NumTaxonId)) body.num_taxon_ids = this.num_taxon_id;
     if (this.selectedAttributes.includes(Attribute.ReqTaxonId)) body.req_taxon_ids = this.isReqTaxonIdsAlphaNumeric ? this.req_taxon_ids_str : this.req_taxon_ids;
     console.log(body);
@@ -180,6 +181,7 @@ export class MainPage {
     this.photoService.lastCropEvent = null;
     this.photoService.imgLat = 0;
     this.photoService.imgLon = 0;
+    this.photoService.imgDate = "";
     this.responseRaw = '';
     this.responseInfoFlora = null;
     this.responseWsl = null;
@@ -410,7 +412,7 @@ export class MainPage {
     //this.currentResponseFormat = ResponseFormat.WSL;
   }
 
-  private useCoordsFromImg(): boolean {
+  public useCoordsFromImg(): boolean {
     return this.useLatLonFromImg && this.photoService.imgLat > 0 && this.photoService.imgLon > 0;
   }
 

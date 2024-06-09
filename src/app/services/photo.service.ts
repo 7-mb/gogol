@@ -19,10 +19,14 @@ export class PhotoService {
   isCropping: boolean = false;
   imgLat: number = 0;
   imgLon: number = 0;
+  imgDate: string = "";
+  currentImgLat: number = 0;
+  currentImgLon: number = 0;
+  currentImgDate: string = "";
 
   capturedImage: Photo | null = null;
 
-  public photos: string[] = [];
+  public photos: CapturedPhoto[] = [];
   public resizedPhotos: ResizedPhoto[] = [];
   public base64Photos: string[] = [];
 
@@ -61,6 +65,7 @@ export class PhotoService {
 
     console.log("captured photo:");
     console.log(capturedPhoto);
+    console.log(JSON.stringify(capturedPhoto));
 
     this.croppingImage = await this.readAsBase64(capturedPhoto);
     this.capturedImage = capturedPhoto;
@@ -81,20 +86,37 @@ export class PhotoService {
       }
     } as Photo;*/
 
-    if (this.imgLat == 0 || this.imgLon == 0) {
-      if (this.hasImageIosCoords(capturedPhoto)) {
-        this.imgLat = capturedPhoto?.exif?.GPS?.Latitude;
-        this.imgLon = capturedPhoto?.exif?.GPS?.Longitude;
-        console.log("### IOS coords: " + this.imgLat + ", " + this.imgLon);
-      }
-      else if (this.hasImageAndroidCoords(capturedPhoto)) {
-        this.imgLat = this.parseAndroidCoord(capturedPhoto.exif.GPSLatitude);
-        this.imgLon = this.parseAndroidCoord(capturedPhoto.exif.GPSLongitude);
-        console.log("### Android coords: " + this.imgLat + ", " + this.imgLon);
-      } else {
-        console.log("### No image coords found");
-      }
+    this.currentImgLat = 0;
+    this.currentImgLon = 0;
+    this.currentImgDate = "";
+
+    if (this.hasImageIosCoords(capturedPhoto)) {
+
+      this.currentImgLat = capturedPhoto?.exif?.GPS?.Latitude;
+      this.currentImgLon = capturedPhoto?.exif?.GPS?.Longitude;
+      this.currentImgDate = this.parseImgDate(capturedPhoto?.exif?.DateTime);
+
+      this.imgLat = this.imgLat === 0 || this.imgLon == 0 ? this.currentImgLat : this.imgLat;
+      this.imgLon = this.imgLat === 0 || this.imgLon == 0 ? this.currentImgLon : this.imgLon;
+      this.imgDate = this.imgDate === "" ? this.currentImgDate : this.imgDate;
+
+      console.log("### IOS coords: " + this.imgLat + ", " + this.imgLon + ", " + this.imgDate);
     }
+    else if (this.hasImageAndroidCoords(capturedPhoto)) {
+
+      this.currentImgLat = this.parseAndroidCoord(capturedPhoto.exif.GPSLatitude);
+      this.currentImgLon = this.parseAndroidCoord(capturedPhoto.exif.GPSLongitude);
+      this.currentImgDate = this.parseImgDate(capturedPhoto.exif.DateTime);
+
+      this.imgLat = this.imgLat === 0 || this.imgLon == 0 ? this.currentImgLat : this.imgLat;
+      this.imgLon = this.imgLat === 0 || this.imgLon == 0 ? this.currentImgLon : this.imgLon;
+      this.imgDate = this.imgDate === "" ? this.currentImgDate : this.imgDate;
+
+      console.log("### Android coords: " + this.imgLat + ", " + this.imgLon + ", " + this.imgDate);
+    } else {
+      console.log("### No image coords found");
+    }
+
   }
 
   private hasImageIosCoords(img: Photo): boolean {
@@ -131,6 +153,45 @@ export class PhotoService {
     return dd as number
   }
 
+  private parseImgDate(input: string): string {
+    if (input === null || input === "") {
+      return "";
+    }
+
+    let extractedDate = this.extractImgDate(input);
+    console.log("extractedDate: ", extractedDate);
+
+    // Regular Expression to match dates in the format YYYY:MM:DD, YYYY-MM-DD, or YYYY/MM/DD
+    const datePattern = /(\d{4})[-:/](\d{2})[-:/](\d{2})/;
+    const match = extractedDate.match(datePattern);
+
+    if (match) {
+      const [, year, month, day] = match;
+      return `${year}-${month}-${day}`;
+    }
+    return "";
+  }
+
+  private extractImgDate(input: string): string {
+    if (!input) {
+        return '';
+    }
+
+    const dateTimeParts = input.split(' ');
+    if (dateTimeParts.length < 2) {
+        return '';
+    }
+
+    const datePart = dateTimeParts[0];
+    const datePattern = /^\d{4}:\d{2}:\d{2}$/;
+
+    if (datePattern.test(datePart)) {
+        return datePart.replace(/:/g, '-');
+    }
+
+    return '';
+}
+
   // Called when cropper is ready
   imageLoaded() {
     console.log("imageLoaded");
@@ -161,7 +222,12 @@ export class PhotoService {
     this.croppingImage = null;
     const event = this.lastCropEvent;
     const objectUrl = event !== null ? event.objectUrl : this.capturedImage?.webPath!;
-    this.photos.unshift(objectUrl || "");
+    this.photos.unshift({
+      src: objectUrl,
+      lat: this.currentImgLat,
+      lon: this.currentImgLon,
+      date: this.currentImgDate
+    } as CapturedPhoto || {});
     const shorterSideLength = 384;
     await this.resizeImage(objectUrl || "", shorterSideLength);
   }
@@ -252,4 +318,11 @@ export class PhotoService {
 
 export interface ResizedPhoto {
   webviewPath?: string;
+}
+
+export interface CapturedPhoto {
+  src: string;
+  lat?: number;
+  lon?: number;
+  date?: string;
 }
