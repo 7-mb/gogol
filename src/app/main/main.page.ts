@@ -52,7 +52,7 @@ export class MainPage {
   public selectedAttributes: string[] = [];
   public num_taxon_id: number = 5;
   public req_taxon_ids: number[] = [1000000];
-  public req_taxon_ids_str: string[] = ["1046220"];
+  public req_taxon_ids_str: string[] = ["1000000"];
   public isReqTaxonIdsAlphaNumeric: boolean = false;
   public urlInfoflora: string = "https://florid.infoflora.ch/api/v1/public/identify/images";
   public urlWsl: string = "https://speciesid.wsl.ch/florid";
