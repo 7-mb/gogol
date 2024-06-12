@@ -96,8 +96,8 @@ export class PhotoService {
       this.currentImgLon = capturedPhoto?.exif?.GPS?.Longitude;
       this.currentImgDate = this.parseImgDate(capturedPhoto?.exif?.DateTime);
 
-      this.imgLat = this.imgLat === 0 || this.imgLon == 0 ? this.currentImgLat : this.imgLat;
-      this.imgLon = this.imgLat === 0 || this.imgLon == 0 ? this.currentImgLon : this.imgLon;
+      this.imgLat = this.imgLat === 0 || this.imgLon === 0 ? this.currentImgLat : this.imgLat;
+      this.imgLon = this.imgLat === 0 || this.imgLon === 0 ? this.currentImgLon : this.imgLon;
       this.imgDate = this.imgDate === "" ? this.currentImgDate : this.imgDate;
 
       console.log("### IOS coords: " + this.imgLat + ", " + this.imgLon + ", " + this.imgDate);
