@@ -4,6 +4,8 @@ import 'hammerjs';
 import { ImageCroppedEvent, ImageTransform, } from 'ngx-image-cropper';
 import { Capacitor } from '@capacitor/core';
 import { LoadingController } from '@ionic/angular';
+import * as moment from 'moment';
+import { GeolocationContainer } from './geolocation.container';
 
 const outputCanvas = document.getElementById('outputCanvas') as HTMLCanvasElement;
 const ctx = outputCanvas.getContext('2d');
@@ -23,6 +25,7 @@ export class PhotoService {
   currentImgLat: number = 0;
   currentImgLon: number = 0;
   currentImgDate: string = "";
+  currentImgDateM: moment.Moment = moment('2000-01-01');
 
   capturedImage: Photo | null = null;
 
@@ -32,7 +35,7 @@ export class PhotoService {
 
   loadingCtrl: LoadingController;
 
-  constructor() {
+  constructor(public geolocationContainer: GeolocationContainer) {
     this.loadingCtrl = new LoadingController();
   }
 
@@ -89,31 +92,48 @@ export class PhotoService {
     this.currentImgLat = 0;
     this.currentImgLon = 0;
     this.currentImgDate = "";
+    const exifDateFormat = 'YYYY:MM:DD HH:mm:ss';
+    this.currentImgDateM = moment(capturedPhoto?.exif?.DateTimeOriginal, exifDateFormat);
+    if (this.currentImgDateM.isValid()) {
+      this.currentImgDate = this.currentImgDateM.format('YYYY-MM-DD');
+    }
+
+    console.log("currentImgDateM:");
+    console.log(this.currentImgDateM);
+    console.log(this.currentImgDate);
+    this.imgDate = this.imgDate === "" ? this.currentImgDate : this.imgDate;
 
     if (this.hasImageIosCoords(capturedPhoto)) {
 
       this.currentImgLat = capturedPhoto?.exif?.GPS?.Latitude;
       this.currentImgLon = capturedPhoto?.exif?.GPS?.Longitude;
-      this.currentImgDate = this.parseImgDate(capturedPhoto?.exif?.DateTime);
 
       this.imgLat = this.imgLat === 0 || this.imgLon === 0 ? this.currentImgLat : this.imgLat;
       this.imgLon = this.imgLat === 0 || this.imgLon === 0 ? this.currentImgLon : this.imgLon;
-      this.imgDate = this.imgDate === "" ? this.currentImgDate : this.imgDate;
 
-      console.log("### IOS coords: " + this.imgLat + ", " + this.imgLon + ", " + this.imgDate);
+      console.log("### Found IOS coords: " + this.currentImgLat + ", " + this.currentImgLon + ", " + this.currentImgDate);
     }
     else if (this.hasImageAndroidCoords(capturedPhoto)) {
 
       this.currentImgLat = this.parseAndroidCoord(capturedPhoto.exif.GPSLatitude);
       this.currentImgLon = this.parseAndroidCoord(capturedPhoto.exif.GPSLongitude);
-      this.currentImgDate = this.parseImgDate(capturedPhoto.exif.DateTime);
 
-      this.imgLat = this.imgLat === 0 || this.imgLon == 0 ? this.currentImgLat : this.imgLat;
-      this.imgLon = this.imgLat === 0 || this.imgLon == 0 ? this.currentImgLon : this.imgLon;
-      this.imgDate = this.imgDate === "" ? this.currentImgDate : this.imgDate;
+      this.imgLat = this.imgLat === 0 || this.imgLon === 0 ? this.currentImgLat : this.imgLat;
+      this.imgLon = this.imgLat === 0 || this.imgLon === 0 ? this.currentImgLon : this.imgLon;
 
-      console.log("### Android coords: " + this.imgLat + ", " + this.imgLon + ", " + this.imgDate);
-    } else {
+      console.log("### Found Android coords: " + this.currentImgLat + ", " + this.currentImgLon + ", " + this.currentImgDate);
+    }
+    else if (this.imageWasJustTaken(capturedPhoto)) {
+
+      this.currentImgLat = this.geolocationContainer.currentLat;
+      this.currentImgLon = this.geolocationContainer.currentLon;
+
+      this.imgLat = this.imgLat === 0 || this.imgLon === 0 ? this.currentImgLat : this.imgLat;
+      this.imgLon = this.imgLat === 0 || this.imgLon === 0 ? this.currentImgLon : this.imgLon;
+
+      console.log("### No Exif coords, use current coords: " + this.currentImgLat + ", " + this.currentImgLon + ", " + this.currentImgDate);
+    }
+    else {
       console.log("### No image coords found");
     }
 
@@ -139,6 +159,19 @@ export class PhotoService {
       img?.exif?.GPSLongitude.includes("/")
   }
 
+  private imageWasJustTaken(img: Photo): boolean {
+    if (!this.currentImgDateM.isValid()) {
+      console.log("no valid datetime in image exif");
+      return false;
+    }
+    const now = moment();
+    console.log("now:");
+    console.log(now);
+    let diff = now.diff(this.currentImgDateM, 'seconds');
+    console.log("age of image in seconds: " + diff);
+    return diff < 60;
+  }
+
   private parseAndroidCoord(coord: string): number {
     const MINUTES_DIVISOR = 60
     const SECONDS_DIVISOR = 60 * 60
@@ -152,45 +185,6 @@ export class PhotoService {
     let dd: any = parseFloat(degrees) + (parseFloat(minutes) * parseInt(minuteDenominator)) / MINUTES_DIVISOR + (parseFloat(seconds) * parseInt(secondsDenominator)) / SECONDS_DIVISOR / parseFloat(divisor)
     return dd as number
   }
-
-  private parseImgDate(input: string): string {
-    if (input === null || input === "") {
-      return "";
-    }
-
-    let extractedDate = this.extractImgDate(input);
-    console.log("extractedDate: ", extractedDate);
-
-    // Regular Expression to match dates in the format YYYY:MM:DD, YYYY-MM-DD, or YYYY/MM/DD
-    const datePattern = /(\d{4})[-:/](\d{2})[-:/](\d{2})/;
-    const match = extractedDate.match(datePattern);
-
-    if (match) {
-      const [, year, month, day] = match;
-      return `${year}-${month}-${day}`;
-    }
-    return "";
-  }
-
-  private extractImgDate(input: string): string {
-    if (!input) {
-        return '';
-    }
-
-    const dateTimeParts = input.split(' ');
-    if (dateTimeParts.length < 2) {
-        return '';
-    }
-
-    const datePart = dateTimeParts[0];
-    const datePattern = /^\d{4}:\d{2}:\d{2}$/;
-
-    if (datePattern.test(datePart)) {
-        return datePart.replace(/:/g, '-');
-    }
-
-    return '';
-}
 
   // Called when cropper is ready
   imageLoaded() {

@@ -12,6 +12,7 @@ import { ResponseWsl } from '../ApiResponseWsl';
 import { ResponseInfoFlora } from '../ApiResponseInfoFlora';
 import { ApiStruct, Attribute, ResponseFormat } from '../Definitions';
 import { ResultTableWslComponent } from '../result-table/result-table-wsl.component';
+import { GeolocationContainer } from '../services/geolocation.container';
 
 const store = new Storage();
 store.create();
@@ -32,16 +33,13 @@ export class MainPage {
   public date: string = "";
   public manualDate: string = "";
 
-  public currentLat: number = 47.36667;
-  public currentLon: number = 8.25;
-
-  public manualLat: number = this.currentLat;
-  public manualLon: number = this.currentLon;
+  public manualLat: number = GeolocationContainer.DEFAULT_LAT;
+  public manualLon: number = GeolocationContainer.DEFAULT_LON;
 
   public isDateManual: boolean = false;
   public isLatManual: boolean = false;
   public isLonManual: boolean = false;
-  public useLatLonFromImg: boolean = false;
+  public useExifInfo: boolean = true;
 
   public responseRaw: string = "";
   public responseInfoFlora: ResponseInfoFlora | null = null;
@@ -64,7 +62,7 @@ export class MainPage {
 
   loadingCtrl: LoadingController;
 
-  constructor(public photoService: PhotoService) {
+  constructor(public photoService: PhotoService, public geolocationContainer: GeolocationContainer) {
     this.loadingCtrl = new LoadingController();
   }
 
@@ -91,7 +89,7 @@ export class MainPage {
       'isDateManual',
       'isLatManual',
       'isLonManual',
-      'useLatLonFromImg',
+      'useExifInfo',
       'manualDate',
       'manualLat',
       'manualLon'
@@ -122,12 +120,15 @@ export class MainPage {
     }
     const body: any = {};
     if (this.selectedAttributes.includes(Attribute.Images)) body.images = this.photoService.base64Photos;
+
     if (this.selectedAttributes.includes(Attribute.Lat)) body.lat = this.useCoordsFromImg() ?
-      this.photoService.imgLat : this.isLatManual ? this.manualLat : this.currentLat;
+      this.photoService.imgLat : this.isLatManual ? this.manualLat : this.geolocationContainer.currentLat;
     if (this.selectedAttributes.includes(Attribute.Lon)) body.lon = this.useCoordsFromImg() ?
-      this.photoService.imgLon : this.isLonManual ? this.manualLon : this.currentLon;
-    if (this.selectedAttributes.includes(Attribute.Date)) body.date = this.useCoordsFromImg() && this.photoService.imgDate !== "" ?
+      this.photoService.imgLon : this.isLonManual ? this.manualLon : this.geolocationContainer.currentLon;
+
+    if (this.selectedAttributes.includes(Attribute.Date)) body.date = this.useDateFromImg() ?
       this.photoService.imgDate : this.isDateManual ? this.manualDate : this.date;
+
     if (this.selectedAttributes.includes(Attribute.NumTaxonId)) body.num_taxon_ids = this.num_taxon_id;
     if (this.selectedAttributes.includes(Attribute.ReqTaxonId)) body.req_taxon_ids = this.isReqTaxonIdsAlphaNumeric ? this.req_taxon_ids_str : this.req_taxon_ids;
     console.log(body);
@@ -248,11 +249,11 @@ export class MainPage {
     this.setStoreValue("showResponseAsTable", value);
   }
 
-  useLatLonFromImgChange(e: Event) {
-    console.log("useLatLonFromImgChange");
+  useExifInfoChange(e: Event) {
+    console.log("useExifInfoChange");
     console.log(e);
     const value = (e as CustomEvent).detail.checked;
-    this.setStoreValue("useLatLonFromImg", value);
+    this.setStoreValue("useExifInfo", value);
   }
 
   isDateManualChange(e: Event) {
@@ -271,7 +272,7 @@ export class MainPage {
     console.log(e);
     const isManual = (e as CustomEvent).detail.checked;
     if (!this.isLatManual) {
-      this.manualLat = this.currentLat;
+      this.manualLat = this.geolocationContainer.currentLat;
     }
     this.setStoreValue("isLatManual", isManual);
     this.setStoreValue("manualLat", this.manualLat);
@@ -282,7 +283,7 @@ export class MainPage {
     console.log(e);
     const isManual = (e as CustomEvent).detail.checked;
     if (!this.isLonManual) {
-      this.manualLon = this.currentLon;
+      this.manualLon = this.geolocationContainer.currentLon;
     }
     this.setStoreValue("isLonManual", isManual);
     this.setStoreValue("manualLon", this.manualLon);
@@ -316,8 +317,8 @@ export class MainPage {
       maximumAge: 0
     }).then((coords) => {
       console.log('Current position: ' + coords.coords.latitude + ", " + coords.coords.longitude);
-      this.currentLat = coords.coords.latitude;
-      this.currentLon = coords.coords.longitude;
+      this.geolocationContainer.currentLat = coords.coords.latitude;
+      this.geolocationContainer.currentLon = coords.coords.longitude;
       if (!this.isLatManual) {
         this.manualLat = coords.coords.latitude;
         this.setStoreValue("manualLat", this.manualLat);
@@ -413,7 +414,11 @@ export class MainPage {
   }
 
   public useCoordsFromImg(): boolean {
-    return this.useLatLonFromImg && this.photoService.imgLat > 0 && this.photoService.imgLon > 0;
+    return this.useExifInfo && this.photoService.imgLat > 0 && this.photoService.imgLon > 0;
+  }
+
+  public useDateFromImg(): boolean {
+    return this.useExifInfo && this.photoService.imgDate != "";
   }
 
 }
