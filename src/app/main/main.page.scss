@@ -1,6 +1,10 @@
-ion-title {
+#main-content ion-title {
   padding-left: 0;
   padding-right: 0;
+}
+
+ion-menu-button {
+  color: var(--ion-text-color);
 }
 
 #wsl-logo-text {
