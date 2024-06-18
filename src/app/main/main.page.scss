@@ -41,12 +41,12 @@ ion-img {
 }
 
 ion-fab-button.pulse {
-  animation: pulse 2s infinite;
+  animation: pulse 3s infinite;
 }
 
 @keyframes pulse {
   0% {
-    transform: scale(1.1);
+    transform: scale(1.25);
   }
 
   70% {
@@ -54,6 +54,6 @@ ion-fab-button.pulse {
   }
 
   100% {
-    transform: scale(1.1);
+    transform: scale(1.25);
   }
 }
