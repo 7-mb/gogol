@@ -358,3 +358,26 @@
     </ion-content>
   </ng-template>
 </ion-modal>
+
+<ion-modal [isOpen]="!termsOfUseConfirmed" [backdropDismiss]="false" id="terms-of-use-modal">
+  <ng-template>
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Welcome to SpeciesID</ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      <p class="ion-padding-horizontal">By using our service, you agree to our <a href="#"
+          onclick="window.open('https://speciesid.wsl.ch/terms', '_system', 'location=yes'); return false;">Terms of Use
+          and Privacy Policy</a>. Please read them carefully.</p>
+      <p></p>
+      <ion-item class="item item-text-wrap">
+        <ion-checkbox [checked]="termsOfUseChecked" [(ngModel)]="termsOfUseChecked"><span class="wrap">I have read and
+            agree to the Terms of Use and Privacy Policy.</span></ion-checkbox>
+      </ion-item>
+      <p></p>
+      <ion-button (click)="confirmTermsOfUse()" [disabled]="!termsOfUseChecked" fill="clear"
+        expand="full">Continue</ion-button>
+    </ion-content>
+  </ng-template>
+</ion-modal>

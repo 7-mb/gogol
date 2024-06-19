@@ -28,6 +28,8 @@ export class MainPage {
   Attribute = Attribute;
   ResponseFormat = ResponseFormat;
 
+  public termsOfUseChecked: boolean = false;
+  public termsOfUseConfirmed: boolean = false;
   public showResponseAsTable: boolean = true;
 
   public date: string = "";
@@ -78,6 +80,7 @@ export class MainPage {
 
   initStoreValues() {
     const storeValueNames: (keyof MainPage)[] = [
+      'termsOfUseConfirmed',
       'showResponseAsTable',
       'selectedApi',
       'customApis',
@@ -308,6 +311,12 @@ export class MainPage {
     console.log(e);
     const value = (e as CustomEvent).detail.value;
     this.setStoreValue("manualLon", value);
+  }
+
+  confirmTermsOfUse() {
+    console.log("confirmTermsOfUse");
+    this.termsOfUseConfirmed = true;
+    this.setStoreValue("termsOfUseConfirmed", true);
   }
 
   updateCoords() {
