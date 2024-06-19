@@ -40,6 +40,26 @@ ion-img {
   left: 0.5em;
 }
 
+#camera-button {
+  margin-left: 10px;
+}
+
+#send-button {
+  margin-right: 10px;
+}
+
+#send-button,
+#clear-button,
+#camera-button {
+  margin-bottom: 10px;
+}
+
+.ios #send-button,
+.ios #clear-button,
+.ios #camera-button {
+  margin-bottom: 20px;
+}
+
 ion-fab-button.pulse {
   animation: pulse 3s infinite;
 }

@@ -152,20 +152,20 @@
       </ion-row>
     </ion-grid>
 
-    <ion-fab vertical="bottom" horizontal="end" slot="fixed">
+    <ion-fab vertical="bottom" horizontal="start" slot="fixed" id="camera-button">
       <ion-fab-button (click)="addPhotoToGallery()" [disabled]="photoService.photos.length >= 5"
-        [class.pulse]="photoService.photos.length <= 0">
+        [class.pulse]="photoService.photos.length <= 0" size="small">
         <ion-icon name="camera"></ion-icon>
       </ion-fab-button>
     </ion-fab>
-    <ion-fab vertical="bottom" horizontal="start" slot="fixed">
-      <ion-fab-button (click)="submit()" [disabled]="photoService.photos.length == 0">
-        <ion-icon name="send"></ion-icon>
+    <ion-fab vertical="bottom" horizontal="center" slot="fixed" id="clear-button">
+      <ion-fab-button (click)="clear()" [disabled]="photoService.photos.length == 0" color="light" size="small">
+        <ion-icon name="trash-outline"></ion-icon>
       </ion-fab-button>
     </ion-fab>
-    <ion-fab vertical="bottom" horizontal="center" slot="fixed">
-      <ion-fab-button (click)="clear()" [disabled]="photoService.photos.length == 0">
-        <ion-icon name="close"></ion-icon>
+    <ion-fab vertical="bottom" horizontal="end" slot="fixed" id="send-button">
+      <ion-fab-button (click)="submit()" [disabled]="photoService.photos.length == 0" size="small">
+        <ion-icon name="send"></ion-icon>
       </ion-fab-button>
     </ion-fab>
   </ion-content>
