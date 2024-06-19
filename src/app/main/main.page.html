@@ -21,6 +21,13 @@
         </ion-item>
       </ion-menu-toggle>
     </ion-list>
+    <p class="ion-padding-horizontal">
+      <small>
+        <a href="#"
+          onclick="window.open('https://speciesid.wsl.ch/terms', '_system', 'location=yes'); return false;">Terms of Use
+        </a>
+      </small>
+    </p>
   </ion-content>
 </ion-menu>
 
@@ -100,7 +107,7 @@
         </ion-accordion>
       </ion-accordion-group>
 
-      <ion-item *ngIf="!showResponseAsTable || (currentResponseFormat === ResponseFormat.Raw && responseRaw != '')">
+      <ion-item *ngIf="(!showResponseAsTable && responseRaw != '') || (currentResponseFormat === ResponseFormat.Raw && responseRaw != '')">
         <pre>Response: {{responseRaw}}</pre>
       </ion-item>
       <ion-item
