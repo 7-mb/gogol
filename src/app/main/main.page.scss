@@ -7,6 +7,16 @@ ion-menu-button {
   color: var(--ion-text-color);
 }
 
+.external-link {
+  text-decoration: none;
+
+  ion-icon {
+    margin-left: .5em;
+    vertical-align: text-top;
+  }
+
+}
+
 #wsl-logo-text {
   color: #007B83;
 }
@@ -79,9 +89,12 @@ ion-fab-button.pulse {
 }
 
 #terms-of-use-modal {
-  P, .wrap {
+
+  P,
+  .wrap {
     line-height: 1.7;
   }
+
   .wrap {
     white-space: normal;
   }

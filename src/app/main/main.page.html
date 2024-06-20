@@ -23,8 +23,17 @@
     </ion-list>
     <p class="ion-padding-horizontal">
       <small>
-        <a href="#"
-          onclick="window.open('https://speciesid.wsl.ch/terms', '_system', 'location=yes'); return false;">Terms of Use
+        <a href="#" class="external-link"
+          onclick="window.open('https://speciesid.wsl.ch/about', '_system', 'location=yes'); return false;">About<ion-icon
+            name="open-outline"></ion-icon>
+        </a>
+      </small>
+    </p>
+    <p class="ion-padding-horizontal">
+      <small>
+        <a href="#" class="external-link"
+          onclick="window.open('https://speciesid.wsl.ch/terms', '_system', 'location=yes'); return false;">Terms of
+          Use<ion-icon name="open-outline"></ion-icon>
         </a>
       </small>
     </p>
@@ -107,7 +116,8 @@
         </ion-accordion>
       </ion-accordion-group>
 
-      <ion-item *ngIf="(!showResponseAsTable && responseRaw != '') || (currentResponseFormat === ResponseFormat.Raw && responseRaw != '')">
+      <ion-item
+        *ngIf="(!showResponseAsTable && responseRaw != '') || (currentResponseFormat === ResponseFormat.Raw && responseRaw != '')">
         <pre>Response: {{responseRaw}}</pre>
       </ion-item>
       <ion-item
