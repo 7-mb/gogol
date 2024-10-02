@@ -61,6 +61,8 @@ export class PhotoService {
       resultType: CameraResultType.Uri,
       source: CameraSource.Prompt,
       quality: 100,
+      width: 1920,
+      height: 1920,
       saveToGallery: true
     });
     const loading = await this.loadingCtrl.create();
