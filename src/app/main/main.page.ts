@@ -28,6 +28,8 @@ export class MainPage {
   Attribute = Attribute;
   ResponseFormat = ResponseFormat;
 
+  public storeValuesLoaded: boolean = false;
+
   public termsOfUseChecked: boolean = false;
   public termsOfUseConfirmed: boolean = false;
   public showResponseAsTable: boolean = true;
@@ -98,6 +100,7 @@ export class MainPage {
       'manualLon'
     ];
     storeValueNames.forEach(name => this.initStoreValue(name));
+    this.storeValuesLoaded = true;
   }
 
   async initStoreValue<K extends keyof MainPage>(property: K): Promise<void> {

@@ -376,7 +376,7 @@
   </ng-template>
 </ion-modal>
 
-<ion-modal [isOpen]="!termsOfUseConfirmed" [backdropDismiss]="false" id="terms-of-use-modal">
+<ion-modal [isOpen]="storeValuesLoaded && !termsOfUseConfirmed" [backdropDismiss]="false" id="terms-of-use-modal">
   <ng-template>
     <ion-header>
       <ion-toolbar>
