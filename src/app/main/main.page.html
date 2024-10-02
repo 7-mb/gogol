@@ -244,6 +244,14 @@
             <p><small>{{urlWsl}}</small></p>
           </ion-label>
         </ion-item>
+        <ion-item>
+          <ion-icon (click)="setFungiApi()" slot="start"
+            [name]="selectedApi.name === 'Fungi - WSL' ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>
+          <ion-label (click)="setFungiApi()">
+            <h3>Fungi - WSL</h3>
+            <p><small>{{urlWslFungi}}</small></p>
+          </ion-label>
+        </ion-item>
         <ion-item *ngFor="let customApi of customApis">
           <ion-icon (click)="selectApi(customApi)" slot="start"
             [name]="selectedApi.name === customApi.name ? 'checkmark-circle' : 'ellipse-outline'"></ion-icon>

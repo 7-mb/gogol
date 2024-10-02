@@ -58,6 +58,7 @@ export class MainPage {
   public isReqTaxonIdsAlphaNumeric: boolean = false;
   public urlInfoflora: string = "https://florid.infoflora.ch/api/v1/public/identify/images";
   public urlWsl: string = "https://speciesid.wsl.ch/florid";
+  public urlWslFungi: string = "https://speciesid.wsl.ch/funki";
   public selectedApi: ApiStruct = { name: "Plants - WSL", url: this.urlWsl };
   public customApis: ApiStruct[] = [];
   public newCustomApi: ApiStruct = { name: "", url: "" };
@@ -409,6 +410,11 @@ export class MainPage {
 
   setWslApi() {
     this.selectedApi = { name: "Plants - WSL", url: this.urlWsl };
+    this.setStoreValue("selectedApi", this.selectedApi);
+  }
+
+  setFungiApi() {
+    this.selectedApi = { name: "Fungi - WSL", url: this.urlWslFungi };
     this.setStoreValue("selectedApi", this.selectedApi);
   }
 
